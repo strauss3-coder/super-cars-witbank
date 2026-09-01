@@ -228,36 +228,26 @@ so it exercises the path most people see first.
 
 ## Signing in
 
-**There is no sign-in screen at the moment.** It was taken out while the portal
-and the website are being finished, so the portal opens straight onto the
-dashboard with every page reachable.
+**The portal locks itself as soon as a database is configured.** There is no
+switch to remember:
 
-While it is out:
+| `js/config.js` / `PROJECT` | What the portal does |
+|---|---|
+| still the placeholder | opens straight onto the dashboard, loads the content that ships with the website, saves only in that browser, status pill reads `Local only` |
+| a real Supabase project | shows the sign-in screen and stays hidden until somebody signs in as staff |
 
-- the portal loads the same content the website ships with, so every page has
-  real stock and real copy in it from the first click;
-- edits are saved **in that browser only** — the status pill says `Local only`
-  and the Settings page says the same;
-- photograph uploads do not work, because they need somewhere to upload to.
+That ordering matters. It means there is never a window where the portal is
+publicly reachable **and** has live customer data behind it **and** has no lock
+on the door — the lock arrives in the same moment the data does.
 
-**This does not weaken the database.** Nothing was changed in
-`01-schema.sql`. Row level security still refuses every write from an account
-that is not on the `portal_users` staff list, and the portal cannot write to
-Supabase at all without a session. Connecting a database while the sign-in
-screen is out gives the portal read access to published content and nothing
-more — the same access a visitor to the website has.
+Being signed in is still not enough on its own. The database asks
+`portal_users` what the account may do, and an account that is not on that list
+is signed straight back out with an explanation.
 
-### Putting it back
-
-Everything the sign-in screen needs is still in place: `Cloud.signIn`,
-`Cloud.refresh`, `Cloud.whoAmI`, the role checks and `Shell.lock`. Restoring it
-is three things:
-
-1. Put the login markup and its styles back into `portal/index.html`.
-2. Gate the last line of `Shell.boot` again:
-   `if(Cloud.authed) Shell.enter(); else Shell.lock();`
-3. Delete `const LOCAL_ROLE` and set `Cloud.role` back to `''` at rest, so
-   access comes from the database rather than from this browser.
+Both paths are covered by `test/portal.js`: it opens the portal unconfigured
+and walks all 18 modules, then loads it again with a project filled in and
+asserts the sign-in screen is up, the app is hidden, and nothing has leaked
+into the view.
 
 ---
 

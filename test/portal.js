@@ -112,7 +112,52 @@ const wait = ms => new Promise(r => setTimeout(r,ms));
   }
 
   dom.window.close();
+
+  /* ---------------------------------------------------------------------
+     The other path: a project IS configured. The portal must then refuse to
+     open without a session. This is the state the moment a real Supabase
+     project is filled in, so it is worth proving before that happens.
+     --------------------------------------------------------------------- */
+  console.log('\nWith a database configured and nobody signed in:\n');
+
+  const src = fs.readFileSync(path.join(ROOT,'portal/index.html'),'utf8')
+    .replace("url:'https://YOUR-PROJECT.supabase.co'","url:'https://test-project.supabase.co'")
+    .replace("key:'YOUR-PUBLISHABLE-KEY'","key:'test-publishable-key'");
+
+  const lockErrors = [];
+  const vc2 = new VirtualConsole();
+  vc2.on('jsdomError', e => lockErrors.push('threw: ' + (e.message||e)));
+
+  const dom2 = new JSDOM(src, {
+    url: base + '/portal/index.html',
+    runScripts:'dangerously',
+    resources:{ interceptors:[ requestInterceptor(r =>
+      r.url.indexOf(base) === 0 ? undefined
+        : new Response('', {headers:{'Content-Type':'text/html'}})) ] },
+    pretendToBeVisual:true, virtualConsole: vc2
+  });
+  dom2.window.fetch = () => Promise.reject(new Error('no database in test'));
+  dom2.window.scrollTo = () => {};
+  await wait(900);
+
+  const d2 = dom2.window.document;
+  const lockChecks = [
+    ['sign-in screen is shown',   !d2.querySelector('#login').classList.contains('hide')],
+    ['the portal is hidden',      !d2.querySelector('#app').classList.contains('on')],
+    ['the form is there',         !!d2.querySelector('#loginForm')],
+    ['no data leaked into view',  !d2.querySelector('#view').innerHTML.trim()],
+    ['nothing threw',             lockErrors.length === 0]
+  ];
+  let lockFailed = 0;
+  lockChecks.forEach(([label,ok]) => {
+    if(!ok){ lockFailed++; failed++; }
+    console.log('  ' + (ok ? 'ok    ' : 'FAIL  ') + label);
+  });
+  lockErrors.forEach(e => console.log('          ! ' + e));
+  dom2.window.close();
+
   server.close();
-  console.log('\n' + (nav.length - failed) + ' of ' + nav.length + ' modules clean');
+  console.log('\n' + (nav.length - failed + lockFailed) + ' of ' + nav.length + ' modules clean, ' +
+    (lockChecks.length - lockFailed) + ' of ' + lockChecks.length + ' lock checks passed');
   process.exit(failed || boot.length ? 1 : 0);
 })();

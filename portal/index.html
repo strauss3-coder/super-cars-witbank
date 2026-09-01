@@ -74,8 +74,37 @@ table{border-collapse:collapse;width:100%}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
+/* ------------------------------------------------------------ login -- */
+/* Only ever shown when a Supabase project is configured. Without one there
+   is nothing to sign in to, so the portal opens straight onto the dashboard
+   and says plainly that it is running locally. */
+#login{
+  position:fixed;inset:0;z-index:400;display:grid;place-items:center;padding:24px;
+  background:radial-gradient(720px 400px at 50% -10%,rgba(228,53,60,.20),transparent 62%),var(--bg);
+  transition:opacity .35s var(--ease),visibility .35s;
+}
+#login.hide{opacity:0;visibility:hidden;pointer-events:none}
+.login-card{
+  width:min(410px,100%);background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--r-xl);padding:34px 30px;box-shadow:var(--sh-4);
+}
+.login-mark{
+  width:52px;height:52px;border-radius:14px;margin:0 auto 18px;
+  background:linear-gradient(145deg,var(--acc),#A81820);color:#fff;
+  display:grid;place-items:center;font-size:20px;font-weight:850;letter-spacing:-.03em;
+  box-shadow:0 8px 26px -8px var(--acc-glow);
+}
+.login-card h1{font-size:21px;font-weight:780;letter-spacing:-.02em;text-align:center}
+.login-card > p{font-size:13.5px;color:var(--text-2);text-align:center;margin:7px 0 26px}
+.login-err{
+  display:none;margin-bottom:14px;padding:11px 13px;border-radius:var(--r-sm);
+  background:var(--dan-soft);color:#FCA5A5;font-size:13px;line-height:1.5;
+}
+.login-err.on{display:block}
+.login-hint{margin-top:18px;font-size:11.5px;color:var(--text-3);text-align:center}
 /* -------------------------------------------------------------- app -- */
-#app{min-height:100dvh}
+#app{display:none;min-height:100dvh}
+#app.on{display:block}
 
 .sidebar{
   position:fixed;left:0;top:0;bottom:0;width:var(--sbw);z-index:60;
@@ -530,6 +559,34 @@ table{border-collapse:collapse;width:100%}
   animation:shim 1.4s infinite}
 @keyframes shim{100%{transform:translateX(100%)}}
 </style>
+
+<!-- ============================ LOGIN ============================ -->
+<!-- Hidden by default. Shell.boot only reveals it when a Supabase project
+     is configured; with no project there is nothing to sign in to. -->
+<div id="login" class="hide">
+  <div class="login-card">
+    <div class="login-mark">SC</div>
+    <h1>Super Cars Portal</h1>
+    <p>Sign in to manage your website</p>
+    <form id="loginForm" novalidate>
+      <div class="field" style="margin-bottom:13px">
+        <label for="loginEmail">Email address</label>
+        <input class="inp" type="email" id="loginEmail" autocomplete="username"
+               placeholder="you@supercars-witbank.co.za">
+      </div>
+      <div class="field" style="margin-bottom:16px">
+        <label for="loginPass">Password</label>
+        <input class="inp" type="password" id="loginPass" autocomplete="current-password"
+               placeholder="Your password">
+      </div>
+      <div class="login-err" id="loginErr" role="alert"></div>
+      <button class="btn btn-pri btn-lg btn-block" type="submit" id="loginBtn">Sign in</button>
+      <button class="btn btn-ghost btn-block" type="button" id="loginForgot"
+              style="font-size:12.5px;margin-top:8px">Forgot your password?</button>
+    </form>
+    <div class="login-hint">Secured by Supabase Authentication.</div>
+  </div>
+</div>
 
 <!-- ============================== APP ============================= -->
 <div id="app">
@@ -6381,40 +6438,55 @@ const Shell = {
     pill.title = Cloud.lastError || 'Everything is reaching the database';
   },
 
-  /* There is no sign-in screen at the moment, so a lost session cannot send
-     anyone back to one. It is reported instead, and the portal carries on
-     against the local copy. Restoring sign-in means restoring this. */
+  /* Sends the portal back to the sign-in screen. Never leaves the app visible
+     without a session behind it.
+
+     With no Supabase project configured there is nothing to sign in to, so
+     the portal stays open in local mode instead and says so. */
   lock(message){
-    Cloud.setSession(null);
-    Cloud.role = LOCAL_ROLE;
-    Shell.paintStatus();
-    if(message) UI.toast('warn','Signed out',message);
+    if(!Cloud.configured){
+      Cloud.role = LOCAL_ROLE;
+      Shell.paintStatus();
+      if(message) UI.toast('warn','Signed out',message);
+      return;
+    }
+    U.el('#app').classList.remove('on');
+    U.el('#login').classList.remove('hide');
+    const err = U.el('#loginErr');
+    if(message){ err.textContent = message; err.classList.add('on'); }
+    const pass = U.el('#loginPass');
+    if(pass) pass.value = '';
   },
 
   async enter(){
-    /* Without a sign-in screen the portal always opens. What changes is where
-       its data comes from and whether edits can leave this browser. */
-    if(Cloud.authed){
+    /* With a project configured, a session is required. Without one the portal
+       opens on the content built into the website and cannot write anywhere,
+       so there is nothing to protect. */
+    if(Cloud.configured){
+      if(!Cloud.authed) return Shell.lock();
+
       const role = await Cloud.whoAmI();
       if(role === null){
         UI.toast('warn','Working offline',
           'Could not reach the database. You are seeing the copy stored on this device.');
       }else if(!role){
-        Cloud.role = LOCAL_ROLE;
-        UI.toast('warn','Not on the staff list',
-          'That account cannot see anything in the database. Working locally instead.');
+        await Cloud.signOut();
+        return Shell.lock('That account is not on the staff list, so it cannot see anything. '+
+          'An administrator needs to add it under Users.');
       }
     }else{
       Cloud.role = LOCAL_ROLE;
     }
 
+    U.el('#login').classList.add('hide');
+    U.el('#app').classList.add('on');
+
     const who = Cloud.email ? Cloud.email.split('@')[0] : 'Local';
-    U.el('#userName').textContent = Cloud.email ? who : 'Working locally';
+    U.el('#userName').textContent = Cloud.authed ? who : 'Working locally';
     U.el('#userRole').textContent = Cloud.authed
       ? ({admin:'Administrator',manager:'Manager',sales:'Sales'}[Cloud.role]||Cloud.role)
-      : 'No sign-in required yet';
-    U.el('#userAvatar').textContent = Cloud.email ? U.initials(who) : 'SC';
-    /* Nothing to sign out of when nobody signed in. */
+      : 'No database connected';
+    U.el('#userAvatar').textContent = Cloud.authed ? U.initials(who) : 'SC';
     U.el('#btnLogout').hidden = !Cloud.authed;
 
     Router.buildNav();
@@ -6458,6 +6530,64 @@ const Shell = {
     Cloud.init();
     Store.init();
     Shell.paintStatus();
+
+    /* ---- sign in ---- */
+    /* Wired whether or not a project is configured, because a project can be
+       added without touching this code. */
+    const form = U.el('#loginForm');
+    const err  = U.el('#loginErr');
+    const btn  = U.el('#loginBtn');
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = U.el('#loginEmail').value.trim();
+      const pass  = U.el('#loginPass').value;
+      err.classList.remove('on');
+
+      if(!email || !pass){
+        err.textContent = 'Please fill in both boxes.';
+        err.classList.add('on');
+        return;
+      }
+      if(!Cloud.configured){
+        err.textContent = 'This portal is not pointed at a Supabase project yet, so there '+
+          'is nothing to sign in to. Fill in PROJECT near the top of the script.';
+        err.classList.add('on');
+        return;
+      }
+
+      btn.setAttribute('aria-busy','true');
+      btn.innerHTML = '<span class="spin"></span>Signing in…';
+      try{
+        await Cloud.signIn(email,pass);
+        await Shell.enter();
+      }catch(ex){
+        /* Supabase deliberately gives the same message for a wrong password and
+           an address that does not exist. Say it plainly rather than guessing
+           which it was. */
+        err.textContent = /invalid login/i.test(ex.message)
+          ? 'That email address and password do not match an account.'
+          : ex.message;
+        err.classList.add('on');
+      }finally{
+        btn.removeAttribute('aria-busy');
+        btn.textContent = 'Sign in';
+      }
+    });
+
+    U.el('#loginForgot').addEventListener('click', async () => {
+      const email = U.el('#loginEmail').value.trim();
+      if(!email){
+        err.textContent = 'Type your email address first, then press this again.';
+        err.classList.add('on');
+        return;
+      }
+      /* The same answer either way, so this can never be used to find out
+         which addresses have accounts. */
+      try{ await Cloud.sendReset(email); }catch(ex){}
+      err.classList.remove('on');
+      UI.toast('ok','Check your email','If that address has an account, a reset link is on its way.');
+    });
 
     /* ---- chrome ---- */
     U.el('#burger').addEventListener('click',Shell.openSidebar);
@@ -6516,10 +6646,11 @@ const Shell = {
     });
 
     /* ---- go ---- */
-    /* No sign-in screen for now: the portal opens straight onto the dashboard.
-       Everything auth-related below Cloud is still in place, so putting the
-       screen back is a matter of gating this one call again. */
-    Shell.enter();
+    /* Configured but not signed in means the sign-in screen. Everything else
+       enters directly: either there is a session, or there is no database to
+       protect. */
+    if(!Cloud.configured || Cloud.authed) Shell.enter();
+    else Shell.lock();
   }
 };
 
