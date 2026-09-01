@@ -49,7 +49,7 @@ Promise.all([SC.site, SC.data.settings(), SC.data.vehicles()]).then(function(r){
 
   paintCalc();
   paintApply();
-  SC.reveal();
+  SC.scan(document); SC.fadeImages(document);
 }).catch(function(err){
   console.error('[finance] '+err.message);
   U.el('[data-calc]').innerHTML =

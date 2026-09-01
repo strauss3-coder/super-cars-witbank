@@ -29,7 +29,7 @@ var fin = {};        /* finance defaults, for the "from R x p/m" line */
 var state = {
   make:[], model:[], body:[], fuel:[], trans:[], status:[],
   min:'', max:'', minYear:'', maxYear:'', maxKm:'',
-  q:'', sort:'newest', view:'grid', page:1
+  q:'', sort:'newest', view:'grid', page:1, saved:false
 };
 
 var els = {
@@ -72,6 +72,9 @@ Promise.all([SC.site, SC.data.settings(), SC.data.vehicles()]).then(function(r){
       : 'Our floor is being restocked. Please telephone us for what is arriving.';
   }
 
+  SC.markNewArrivals(all);
+  if(SC.compare) SC.compare.attach(all);
+
   bind();
   paintFilters();
   apply();
@@ -95,6 +98,7 @@ function readUrl(){
     if(p[k]) state[k] = p[k];
   });
   if(p.view === 'list') state.view = 'list';
+  if(p.saved) state.saved = true;
   if(p.page) state.page = Math.max(1, Number(p.page)||1);
 
   if(els.q) els.q.value = state.q;
@@ -116,6 +120,7 @@ function writeUrl(replace){
   });
   if(state.sort !== 'newest') qs.set('sort', state.sort);
   if(state.view !== 'grid')   qs.set('view', state.view);
+  if(state.saved)             qs.set('saved','1');
   if(state.page > 1)          qs.set('page', state.page);
 
   var url = location.pathname + (qs.toString() ? '?'+qs : '');
@@ -125,7 +130,7 @@ function writeUrl(replace){
 window.addEventListener('popstate',function(){
   state = { make:[],model:[],body:[],fuel:[],trans:[],status:[],
             min:'',max:'',minYear:'',maxYear:'',maxKm:'',
-            q:'',sort:'newest',view:'grid',page:1 };
+            q:'',sort:'newest',view:'grid',page:1,saved:false };
   readUrl();
   paintFilters();
   apply(true);
@@ -222,7 +227,10 @@ function match(s){
   var q = s.q.trim().toLowerCase();
   var terms = q ? q.split(/\s+/) : [];
 
+  var savedIds = s.saved ? SC.saved.all() : null;
+
   return all.filter(function(v){
+    if(savedIds && savedIds.indexOf(v.id) < 0) return false;
     if(s.make.length  && s.make.indexOf(v.make) < 0) return false;
     if(s.model.length && s.model.indexOf(v.model) < 0) return false;
     if(s.body.length  && s.body.indexOf(v.body) < 0) return false;
@@ -292,7 +300,7 @@ function apply(skipUrl){
 
   els.results.innerHTML = slice.length
     ? slice.map(function(v,i){
-        return SC.vehicleCard(v,{wide:state.view==='list', reveal:i%4});
+        return SC.vehicleCard(v,{wide:state.view==='list', delay:i%4});
       }).join('')
     : emptyState();
 
@@ -304,10 +312,21 @@ function apply(skipUrl){
   paintChips();
   paintPager(pages, list.length);
   if(!skipUrl) writeUrl(true);
-  SC.reveal(els.results);
+  if(SC.compare && SC.compare.refreshButtons) SC.compare.refreshButtons();
+  SC.scan(els.results);
+  SC.fadeImages(els.results);
 }
 
 function emptyState(){
+  if(state.saved && !SC.saved.all().length){
+    return '<div class="empty" style="grid-column:1/-1">'+SC.icon.heart+
+      '<b>You have not saved anything yet</b>'+
+      '<p>Tap the heart on a car to keep it here. Saved cars stay in this browser, '+
+      'so there is nothing to sign up for.</p>'+
+      '<div class="row" style="justify-content:center;margin-top:6px">'+
+        '<button class="btn btn-pri btn-sm" data-remove="saved" data-value="">See all stock</button>'+
+      '</div></div>';
+  }
   return '<div class="empty" style="grid-column:1/-1">'+SC.icon.search+
     '<b>Nothing matches those filters</b>'+
     '<p>Try widening the price range or clearing a filter. If you tell us what you are after we will look out for it.</p>'+
@@ -332,6 +351,7 @@ function paintChips(){
   if(state.maxYear) chips.push(chip('maxYear','', state.maxYear+' or older'));
   if(state.maxKm) chips.push(chip('maxKm','', 'Under '+U.km(state.maxKm)));
   if(state.q) chips.push(chip('q','', '"'+state.q+'"'));
+  if(state.saved) chips.push(chip('saved','', 'Saved only'));
 
   els.chips.hidden = !chips.length;
   els.chips.innerHTML = chips.join('') + (chips.length > 1
@@ -403,6 +423,35 @@ function bind(){
     apply();
   });
 
+  /* Saved is a filter like any other, so it goes through the same apply(). */
+  var savedBtn = U.el('[data-saved-toggle]',root);
+  if(savedBtn){
+    var paintSaved = function(){
+      var n = SC.saved.all().length;
+      savedBtn.classList.toggle('btn-pri', state.saved);
+      savedBtn.classList.toggle('btn-out', !state.saved);
+      savedBtn.setAttribute('aria-pressed', state.saved ? 'true' : 'false');
+      U.el('[data-heart-icon]',savedBtn).innerHTML =
+        state.saved ? SC.icon.heartFill : SC.icon.heart;
+      U.el('[data-saved-label]',savedBtn).textContent = n ? 'Saved ('+n+')' : 'Saved';
+      savedBtn.hidden = !n && !state.saved;
+    };
+    paintSaved();
+    savedBtn.addEventListener('click',function(){
+      state.saved = !state.saved;
+      state.page = 1;
+      paintSaved();
+      paintFilters();
+      apply();
+    });
+    /* Un-hearting the last card while the filter is on should not strand the
+       visitor on an empty page. */
+    document.addEventListener('sc:saved',function(){
+      paintSaved();
+      if(state.saved) apply();
+    });
+  }
+
   U.els('[data-view]').forEach(function(b){
     b.addEventListener('click',function(){
       state.view = b.dataset.view;
@@ -422,6 +471,8 @@ function bind(){
       var i = state[g].indexOf(v);
       if(i > -1) state[g].splice(i,1);
       if(g==='make' && !state.make.length) state.model = [];
+    }else if(g === 'saved'){
+      state.saved = false;
     }else{
       state[g] = '';
       if(g==='q') els.q.value = '';
@@ -435,7 +486,7 @@ function bind(){
     state.make=[]; state.model=[]; state.body=[]; state.fuel=[];
     state.trans=[]; state.status=[];
     state.min=''; state.max=''; state.minYear=''; state.maxYear='';
-    state.maxKm=''; state.q=''; state.page=1;
+    state.maxKm=''; state.q=''; state.page=1; state.saved=false;
     els.q.value = '';
     paintFilters();
     apply();

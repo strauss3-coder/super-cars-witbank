@@ -74,12 +74,18 @@ insert into public.site_settings (key, value) values ('business', jsonb_build_ob
 -- ---------------------------------------------------------------------------
 insert into public.site_settings (key, value) values ('homepage', jsonb_build_object(
   'heroBadge',    'Witbank''s trusted pre-owned dealership',
+  'heroPhoto',    '',
+  'trust', jsonb_build_array(
+    jsonb_build_object('icon','award', 'value','25+',       'label','Years on Watermeyer Street'),
+    jsonb_build_object('icon','star',  'value','4.8',       'label','Google rating from 37 reviews'),
+    jsonb_build_object('icon','shield','value','Every car', 'label','Inspected before it is listed'),
+    jsonb_build_object('icon','bank',  'value','Same day',  'label','Finance answers through ABSA')
+  ),
   'heroTitle',    'Quality pre-owned vehicles.',
   'heroTitleAccent', 'Priced to move.',
   'heroSubtitle', 'Over 25 years of straight dealing in eMalahleni. Browse our current stock, get finance approved, or trade in the car you have.',
   'ctaPrimary',   jsonb_build_object('text','Browse our stock','link','inventory.html'),
   'ctaSecondary', jsonb_build_object('text','Get finance','link','finance.html'),
-  'searchEnabled', true,
   'searchPlaceholder','Search by make, model or keyword',
   'stats', jsonb_build_array(
     jsonb_build_object('label','Years in business','value','25+','sub','Serving eMalahleni'),
@@ -125,10 +131,49 @@ insert into public.site_settings (key, value) values ('homepage', jsonb_build_ob
   'financeCta',   jsonb_build_object('text','Calculate and apply','link','finance.html'),
   'contactTitle', 'Come and see the car',
   'contactText',  'We are on Watermeyer Street, open six days a week. No appointment needed.',
+  'processTitle','How buying from us works',
+  'processSub','Four steps, and we do most of the work.',
+  'process', jsonb_build_array(
+    jsonb_build_object('icon','search',   'title','Find the car','text','Browse the floor here or come and walk it. We will not follow you around.'),
+    jsonb_build_object('icon','key',      'title','Drive it','text','Book a test drive, or simply arrive. The car will be ready when you get here.'),
+    jsonb_build_object('icon','bank',     'title','We place the finance','text','We submit to the bank most likely to approve you, and chase it ourselves.'),
+    jsonb_build_object('icon','handshake','title','Take it home','text','We handle the licensing and the paperwork. You collect a car that is ready to drive.')
+  ),
+  'promiseTitle','What you get from us',
+  'promiseSub','The things we will not cut corners on.',
+  'promises', jsonb_build_array(
+    jsonb_build_object('icon','shield','title','Checked before it is listed','text','Every vehicle is inspected, serviced and prepared before it reaches the floor or this website.'),
+    jsonb_build_object('icon','doc',   'title','History you can see','text','We tell you what we know about a car before you ask, including the parts that are not flattering.'),
+    jsonb_build_object('icon','swap',  'title','A fair number on your trade','text','We value against the market, put the offer in writing, and settle your outstanding finance directly.'),
+    jsonb_build_object('icon','phone', 'title','We answer afterwards','text','People phone us a year after buying. We pick up. That is most of why they came to us in the first place.')
+  ),
+  'makesTitle','Marques on our floor',
+  'makesSub','The badges we stock most often.',
+  'makeLogos', '{}'::jsonb,
+  'soldTitle','Recently sold',
+  'soldSub','Cars that have already found an owner. Tell us if you want the next one.',
+  'soldCount', 4,
+  'timelineTitle','Twenty-five years, briefly',
+  'timelineSub','How a small floor on Watermeyer Street became what it is.',
+  'faqTitle','Questions we get asked',
+  'faqSub','If yours is not here, telephone us and ask.',
+  'faq', jsonb_build_array(
+    jsonb_build_object('q','Do you take trade-ins?','a','Yes, and we buy outright even if you are not buying from us. Send the details and a few photographs through the sell page and we will come back to you, usually the same day.'),
+    jsonb_build_object('q','Can you arrange finance?','a','We place applications with ABSA Vehicle Finance and the other major banks. Because we submit them ourselves we usually know within a day whether a deal will fly. Approval is the bank''s decision, not ours.'),
+    jsonb_build_object('q','Is there a warranty?','a','It depends on the vehicle and its age. Some still carry the balance of a factory plan. Ask us about the specific car and we will tell you exactly what stands on it.'),
+    jsonb_build_object('q','Can I see the service history?','a','Yes. Ask and we will show you the book and whatever records came with the car before you commit to anything.'),
+    jsonb_build_object('q','Do you deliver outside eMalahleni?','a','We have sent cars all over Mpumalanga and Gauteng. Talk to us about where you are and we will work out the arrangement.'),
+    jsonb_build_object('q','What do I need to bring?','a','For a cash purchase, your ID and proof of address. For finance, add your licence, three months of bank statements and your latest payslip.')
+  ),
+  'bannerTitle','Come and walk the floor',
+  'bannerText','No appointment, no pressure, and nobody trailing you around the lot. We are on Watermeyer Street six days a week.',
+  'bannerCta',  jsonb_build_object('text','Get directions','link','contact.html'),
+  'bannerCta2', jsonb_build_object('text','See the stock','link','inventory.html'),
   'sections', jsonb_build_object(
-    'hero',true,'search',true,'stats',true,'featured',true,'finance',true,
-    'latest',true,'categories',true,'why',true,'testimonials',true,
-    'about',true,'tradein',true,'contact',true,'map',true
+    'hero',true,'search',true,'stats',true,'trust',true,'featured',true,'finance',true,
+    'latest',true,'categories',true,'makes',true,'process',true,'promise',true,
+    'why',true,'timeline',true,'testimonials',true,'sold',true,'faq',true,
+    'about',true,'tradein',true,'banner',true,'contact',true,'map',true
   )
 )) on conflict (key) do update set value = excluded.value;
 
@@ -239,6 +284,18 @@ insert into public.site_settings (key, value) values ('sell', jsonb_build_object
 -- ---------------------------------------------------------------------------
 -- NAVIGATION + FOOTER  ->  Website Content module
 -- ---------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
+-- ANNOUNCEMENT BAR  ->  Announcement Bar module
+-- Off by default. Switch it on for a sale, a holiday closure or a new arrival.
+-- ---------------------------------------------------------------------------
+insert into public.site_settings (key, value) values ('announce', jsonb_build_object(
+  'enabled',  false,
+  'text',     '',
+  'linkText', '',
+  'link',     '',
+  'icon',     'sparkle'
+)) on conflict (key) do update set value = excluded.value;
+
 insert into public.site_settings (key, value) values ('navigation', jsonb_build_object(
   'items', jsonb_build_array(
     jsonb_build_object('label','Home',        'link','index.html'),

@@ -2,6 +2,7 @@
 <html lang="en-ZA">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Used Cars for Sale in Witbank | Super Cars Witbank</title>
 <meta name="theme-color" content="#0E1116">
@@ -9,10 +10,13 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/premium.css">
 </head>
 <body data-page="inventory">
 
 <a class="skip" href="#main">Skip to content</a>
+<div class="read-bar" data-read-bar aria-hidden="true"></div>
+<div data-announce></div>
 <header class="hdr" data-header></header>
 
 <main id="main">
@@ -65,7 +69,10 @@
                 <option value="year-asc">Year: oldest</option>
                 <option value="km-asc">Mileage: lowest</option>
               </select>
-              <div class="view-tog" role="group" aria-label="Layout">
+              <button class="btn btn-out btn-sm" data-saved-toggle type="button" aria-pressed="false">
+        <span data-heart-icon></span> <span data-saved-label>Saved</span>
+      </button>
+      <div class="view-tog" role="group" aria-label="Layout">
                 <button data-view="grid" class="on" aria-label="Grid view" aria-pressed="true"></button>
                 <button data-view="list" aria-label="List view" aria-pressed="false"></button>
               </div>
@@ -87,13 +94,17 @@
 
 <footer class="ftr" data-footer></footer>
 <div data-wa-float></div>
+<div data-compare-tray></div>
 
 <script src="js/config.js"></script>
 <script src="js/core.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/fallback.js"></script>
 <script src="js/data.js"></script>
 <script src="js/site.js"></script>
+<script src="js/forms.js"></script>
 <script src="js/vehicle-card.js"></script>
+<script src="js/compare.js"></script>
 <script src="js/inventory.js"></script>
 </body>
 </html>

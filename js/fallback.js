@@ -79,12 +79,18 @@ SC.fallback = {
 
     homepage:{
       heroBadge:'Witbank’s trusted pre-owned dealership',
+      heroPhoto:'',
+      trust:[
+        {icon:'award',  value:'25+',  label:'Years on Watermeyer Street'},
+        {icon:'star',   value:'4.8',  label:'Google rating from 37 reviews'},
+        {icon:'shield', value:'Every car', label:'Inspected before it is listed'},
+        {icon:'bank',   value:'Same day', label:'Finance answers through ABSA'}
+      ],
       heroTitle:'Quality pre-owned vehicles.',
       heroTitleAccent:'Priced to move.',
       heroSubtitle:'Over 25 years of straight dealing in eMalahleni. Browse our current stock, get finance approved, or trade in the car you have.',
       ctaPrimary:{text:'Browse our stock',link:'inventory.html'},
       ctaSecondary:{text:'Get finance',link:'finance.html'},
-      searchEnabled:true,
       searchPlaceholder:'Search by make, model or keyword',
       stats:[
         {label:'Years in business',value:'25+',      sub:'Serving eMalahleni'},
@@ -130,10 +136,70 @@ SC.fallback = {
       financeCta:{text:'Calculate and apply',link:'finance.html'},
       contactTitle:'Come and see the car',
       contactText:'We are on Watermeyer Street, open six days a week. No appointment needed.',
+      /* ---- how buying works ---- */
+      processTitle:'How buying from us works',
+      processSub:'Four steps, and we do most of the work.',
+      process:[
+        {icon:'search',    title:'Find the car',     text:'Browse the floor here or come and walk it. We will not follow you around.'},
+        {icon:'key',       title:'Drive it',         text:'Book a test drive, or simply arrive. The car will be ready when you get here.'},
+        {icon:'bank',      title:'We place the finance', text:'We submit to the bank most likely to approve you, and chase it ourselves.'},
+        {icon:'handshake', title:'Take it home',     text:'We handle the licensing and the paperwork. You collect a car that is ready to drive.'}
+      ],
+
+      /* ---- what we promise ---- */
+      promiseTitle:'What you get from us',
+      promiseSub:'The things we will not cut corners on.',
+      promises:[
+        {icon:'shield',  title:'Checked before it is listed', text:'Every vehicle is inspected, serviced and prepared before it reaches the floor or this website.'},
+        {icon:'doc',     title:'History you can see',         text:'We tell you what we know about a car before you ask, including the parts that are not flattering.'},
+        {icon:'swap',    title:'A fair number on your trade', text:'We value against the market, put the offer in writing, and settle your outstanding finance directly.'},
+        {icon:'phone',   title:'We answer afterwards',        text:'People phone us a year after buying. We pick up. That is most of why they came to us in the first place.'}
+      ],
+
+      /* ---- marques on the floor ---- */
+      makesTitle:'Marques on our floor',
+      makesSub:'The badges we stock most often.',
+      makeLogos:{},
+
+      /* ---- recently sold ---- */
+      soldTitle:'Recently sold',
+      soldSub:'Cars that have already found an owner. Tell us if you want the next one.',
+      soldCount:4,
+
+      /* ---- timeline heading. The milestones themselves live in the About
+         page content, so the story is written once. ---- */
+      timelineTitle:'Twenty-five years, briefly',
+      timelineSub:'How a small floor on Watermeyer Street became what it is.',
+
+      /* ---- questions ---- */
+      faqTitle:'Questions we get asked',
+      faqSub:'If yours is not here, telephone us and ask.',
+      faq:[
+        {q:'Do you take trade-ins?',
+         a:'Yes, and we buy outright even if you are not buying from us. Send the details and a few photographs through the sell page and we will come back to you, usually the same day.'},
+        {q:'Can you arrange finance?',
+         a:'We place applications with ABSA Vehicle Finance and the other major banks. Because we submit them ourselves we usually know within a day whether a deal will fly. Approval is the bank\'s decision, not ours.'},
+        {q:'Is there a warranty?',
+         a:'It depends on the vehicle and its age. Some still carry the balance of a factory plan. Ask us about the specific car and we will tell you exactly what stands on it.'},
+        {q:'Can I see the service history?',
+         a:'Yes. Ask and we will show you the book and whatever records came with the car before you commit to anything.'},
+        {q:'Do you deliver outside eMalahleni?',
+         a:'We have sent cars all over Mpumalanga and Gauteng. Talk to us about where you are and we will work out the arrangement.'},
+        {q:'What do I need to bring?',
+         a:'For a cash purchase, your ID and proof of address. For finance, add your licence, three months of bank statements and your latest payslip.'}
+      ],
+
+      /* ---- closing banner ---- */
+      bannerTitle:'Come and walk the floor',
+      bannerText:'No appointment, no pressure, and nobody trailing you around the lot. We are on Watermeyer Street six days a week.',
+      bannerCta:{text:'Get directions',link:'contact.html'},
+      bannerCta2:{text:'See the stock',link:'inventory.html'},
+
       sections:{
-        hero:true, search:true, stats:true, featured:true, finance:true,
-        latest:true, categories:true, why:true, testimonials:true,
-        about:true, tradein:true, contact:true, map:true
+        hero:true, search:true, stats:true, trust:true, featured:true, finance:true,
+        latest:true, categories:true, makes:true, process:true, promise:true,
+        why:true, timeline:true, testimonials:true, sold:true, faq:true,
+        about:true, tradein:true, banner:true, contact:true, map:true
       }
     },
 
@@ -223,6 +289,14 @@ SC.fallback = {
       formTitle:'Tell us about your car',
       formNote:'Photos help us give you an accurate number. Six is plenty: front, back, both sides, the interior and the odometer.',
       maxPhotos:8
+    },
+
+    announce:{
+      enabled:false,
+      text:'',
+      linkText:'',
+      link:'',
+      icon:'sparkle'
     },
 
     navigation:{

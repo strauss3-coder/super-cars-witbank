@@ -39,8 +39,11 @@ Promise.all([SC.site, SC.data.settings(), SC.data.vehicles()]).then(function(r){
   actions();
   related(all);
 
+  SC.markNewArrivals(all);
+  if(SC.compare) SC.compare.attach(all);
   SC.data.trackView(vehicle.id);
-  SC.reveal();
+  SC.scan(document);
+  SC.fadeImages(document);
 }).catch(function(err){
   console.error('[vehicle] '+err.message);
   host.innerHTML = '<div class="empty">'+SC.icon.warn+
@@ -521,9 +524,10 @@ function related(all){
 
   slot.innerHTML = list.map(function(x,i){
     if(x.price > 0 && !x.installment) x.installment = SC.instalment(x.price, fin);
-    return SC.vehicleCard(x,{reveal:i%4});
+    return SC.vehicleCard(x,{delay:i%4});
   }).join('');
   sec.hidden = false;
+  if(SC.compare && SC.compare.refreshButtons) SC.compare.refreshButtons();
 }
 
 })();

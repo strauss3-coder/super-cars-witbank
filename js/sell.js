@@ -26,7 +26,7 @@ Promise.all([SC.site, SC.data.settings()]).then(function(r){
   paintPoints();
   paintSteps();
   paintForm();
-  SC.reveal();
+  SC.scan(document); SC.fadeImages(document);
 }).catch(function(err){
   console.error('[sell] '+err.message);
   U.el('[data-sell-form]').innerHTML =

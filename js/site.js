@@ -31,8 +31,9 @@ SC.site = SC.data.settings().then(function(s){
 
   SC.biz = biz;
   paintSeo(seo, biz);
+  paintAnnounce(s.announce || {});
   paintHeader(biz, nav);
-  paintFooter(biz, ftr, nav);
+  paintFooter(biz, ftr, nav, s.finance || {});
   paintWhatsApp(biz);
   paintBusinessBindings(biz);
   return s;
@@ -142,6 +143,45 @@ function script(obj,id){
   el.textContent = JSON.stringify(obj);
 }
 
+/* -------------------------------------------------------- announcement -- */
+/* A strip above the header for a sale, a holiday closure or a new arrival.
+   Off unless staff switch it on, and a visitor who dismisses it is not shown
+   the same message again for the rest of the session. */
+function paintAnnounce(a){
+  var host = U.el('[data-announce]');
+  if(!host) return;
+  if(!a.enabled || !a.text){ host.remove(); return; }
+
+  /* The key includes the text, so editing the message brings the bar back
+     for someone who dismissed the previous one. */
+  var key = 'sc_announce_' + String(a.text).length + '_' + String(a.text).slice(0,24);
+  try{ if(sessionStorage.getItem(key)){ host.remove(); return; } }catch(e){}
+
+  host.innerHTML =
+    '<div class="announce" role="region" aria-label="Announcement">'+
+      '<div class="announce-in wrap">'+
+        (SC.icon[a.icon] || SC.icon.sparkle)+
+        '<span>'+U.esc(a.text)+
+          (a.link && a.linkText
+            ? ' <a href="'+U.esc(a.link)+'">'+U.esc(a.linkText)+'</a>' : '')+
+        '</span>'+
+      '</div>'+
+      '<button class="announce-x" aria-label="Dismiss this announcement">'+SC.icon.x+'</button>'+
+    '</div>';
+
+  host.querySelector('.announce-x').addEventListener('click',function(){
+    try{ sessionStorage.setItem(key,'1'); }catch(e){}
+    host.style.height = host.offsetHeight+'px';
+    requestAnimationFrame(function(){
+      host.style.transition = 'height .3s cubic-bezier(.22,1,.36,1), opacity .2s';
+      host.style.height = '0';
+      host.style.opacity = '0';
+      host.style.overflow = 'hidden';
+      setTimeout(function(){ host.remove(); },320);
+    });
+  });
+}
+
 /* -------------------------------------------------------------- header -- */
 function paintHeader(biz,nav){
   var host = U.el('[data-header]');
@@ -213,7 +253,14 @@ function paintHeader(biz,nav){
 }
 
 /* -------------------------------------------------------------- footer -- */
-function paintFooter(biz,ftr,nav){
+function starRow(rating){
+  var full = Math.round(Number(rating)||0), out = '';
+  for(var i=1;i<=5;i++) out += '<span'+(i<=full?'':' class="off"')+'>'+SC.icon.starFill+'</span>';
+  return out;
+}
+
+function paintFooter(biz,ftr,nav,fin){
+  fin = fin || {};
   var host = U.el('[data-footer]');
   if(!host) return;
 
@@ -241,12 +288,37 @@ function paintFooter(biz,ftr,nav){
             '<span>'+U.esc(biz.address2||'Witbank')+'</span></span>'+
           '</a>'+
           (ftr.blurb ? '<p class="ftr-blurb">'+U.esc(ftr.blurb)+'</p>' : '')+
+
+          /* the rating, because it is the strongest thing this business has */
+          (biz.googleRating
+            ? '<div class="ftr-rating">'+
+                '<div><div class="score">'+U.esc(biz.googleRating)+'</div></div>'+
+                '<div style="min-width:0">'+
+                  '<div class="rating">'+starRow(biz.googleRating)+'</div>'+
+                  '<small>'+U.esc(biz.googleReviews||0)+' Google reviews'+
+                    (biz.autotraderRating
+                      ? ' &middot; '+U.esc(biz.autotraderRating)+' on AutoTrader' : '')+
+                  '</small>'+
+                '</div>'+
+              '</div>'
+            : '')+
+
           (socialMap.length
             ? '<div class="ftr-social">'+socialMap.map(function(x){
                 return '<a href="'+U.esc(social[x[0]])+'" target="_blank" rel="noopener noreferrer" '+
                        'aria-label="'+x[2]+'">'+SC.icon[x[1]]+'</a>';
               }).join('')+'</div>'
             : '')+
+
+          /* what the business actually is, stated plainly */
+          '<div class="ftr-badges">'+
+            (biz.established
+              ? '<span class="ftr-badge">'+SC.icon.award+'Trading since '+U.esc(biz.established)+'</span>' : '')+
+            (fin.partner
+              ? '<span class="ftr-badge">'+SC.icon.bank+U.esc(fin.partner)+'</span>' : '')+
+            (biz.autotraderId
+              ? '<span class="ftr-badge">'+SC.icon.globe+'AutoTrader dealer</span>' : '')+
+          '</div>'+
         '</div>'+
 
         cols.map(function(c){
@@ -260,11 +332,35 @@ function paintFooter(biz,ftr,nav){
         '<div class="ftr-col">'+
           '<h4>Find us</h4>'+
           '<div class="ftr-contact">'+
-            (biz.addressFull ? '<div>'+SC.icon.pin+'<span>'+U.esc(biz.addressFull)+'</span></div>' : '')+
+            (biz.addressFull ? '<div>'+SC.icon.pin+'<span>'+U.esc(biz.addressFull)+
+              (biz.landmark ? '<br><span style="color:var(--text-inv-3)">'+U.esc(biz.landmark)+'</span>' : '')+
+              '</span></div>' : '')+
             (biz.phone ? '<div>'+SC.icon.phone+'<a href="tel:'+U.esc(U.telHref(biz.phone))+'">'+U.esc(biz.phone)+'</a></div>' : '')+
-            (biz.mobile && biz.mobile!==biz.phone ? '<div>'+SC.icon.wa+'<a href="tel:'+U.esc(U.telHref(biz.mobile))+'">'+U.esc(biz.mobile)+'</a></div>' : '')+
+            (biz.mobile ? '<div>'+SC.icon.wa+'<a href="tel:'+U.esc(U.telHref(biz.mobile))+'">'+U.esc(biz.mobile)+'</a></div>' : '')+
             (biz.email ? '<div>'+SC.icon.mail+'<a href="mailto:'+U.esc(biz.email)+'">'+U.esc(biz.email)+'</a></div>' : '')+
           '</div>'+
+
+          /* opening hours, with today marked */
+          (Array.isArray(biz.hours) && biz.hours.length
+            ? '<h4 style="margin-top:22px">Opening hours</h4>'+
+              '<div class="ftr-contact" style="gap:7px">'+
+                biz.hours.map(function(h){
+                  var today = h.day === new Date().toLocaleDateString('en-ZA',{weekday:'long'});
+                  return '<div style="justify-content:space-between;gap:14px'+
+                    (today?';color:#fff;font-weight:650':'')+'">'+
+                    '<span>'+U.esc(h.day.slice(0,3))+'</span>'+
+                    '<span>'+(h.closed ? 'Closed' : U.esc(h.open)+' – '+U.esc(h.close))+'</span>'+
+                  '</div>';
+                }).join('')+
+              '</div>'
+            : '')+
+
+          (biz.mapEmbed
+            ? '<div class="ftr-map" style="margin-top:20px">'+
+                '<iframe title="Where to find us" loading="lazy" '+
+                'referrerpolicy="no-referrer-when-downgrade" src="'+U.esc(biz.mapEmbed)+'"></iframe>'+
+              '</div>'
+            : '')+
         '</div>'+
       '</div>'+
 

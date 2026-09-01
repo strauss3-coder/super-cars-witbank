@@ -2,6 +2,7 @@
 <html lang="en-ZA">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Quality Pre-Owned Cars in Witbank | Super Cars Witbank</title>
 <meta name="theme-color" content="#0E1116">
@@ -9,167 +10,297 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/premium.css">
 </head>
 <body data-page="index">
 
 <a class="skip" href="#main">Skip to content</a>
+<div class="read-bar" data-read-bar aria-hidden="true"></div>
+<div data-announce></div>
 <header class="hdr" data-header></header>
 
 <main id="main">
 
-  <!-- Hero, search and headline figures. Every string comes from the
-       Homepage Editor in the portal. -->
-  <section class="hero" data-sec="hero">
+  <!-- ══════════════════════════════════════════════ HERO ══════════════ -->
+  <section class="hero-pro" data-sec="hero">
+    <div class="hero-photo" data-hero-photo hidden></div>
+    <div class="hero-glow" data-parallax aria-hidden="true"></div>
+    <div class="hero-grain" aria-hidden="true"></div>
+    <div class="hero-vignette" aria-hidden="true"></div>
+
     <div class="wrap">
-      <div class="hero-grid">
+      <div class="hero-grid-pro">
         <div data-hero-copy>
-          <div class="sk" style="height:34px;width:280px;border-radius:999px"></div>
-          <div class="sk" style="height:62px;width:90%;margin-top:22px"></div>
-          <div class="sk" style="height:62px;width:70%;margin-top:10px"></div>
-          <div class="sk" style="height:20px;width:80%;margin-top:22px"></div>
+          <div class="sk" style="height:36px;width:290px;border-radius:999px"></div>
+          <div class="sk" style="height:66px;width:92%;margin-top:24px"></div>
+          <div class="sk" style="height:66px;width:68%;margin-top:12px"></div>
+          <div class="sk" style="height:22px;width:80%;margin-top:24px"></div>
         </div>
-        <div data-hero-search></div>
+        <div data-sec="search"><div data-hero-search></div></div>
       </div>
-      <div class="hero-stats" data-hero-stats></div>
+
+      <!-- trust chips -->
+      <div data-sec="trust" hidden>
+        <div class="trust-row" data-trust></div>
+      </div>
+
+      <!-- headline figures -->
+      <div data-sec="stats" hidden>
+        <div class="stat-band" data-hero-stats></div>
+      </div>
+
+      <div class="scroll-cue" data-anim="up" data-delay="6" aria-hidden="true">
+        <span class="rail"></span>
+        <span>Scroll</span>
+      </div>
     </div>
   </section>
 
-  <!-- Featured stock -->
-  <section class="section" data-sec="featured" hidden>
+  <!-- ══════════════════════════════════════ FEATURED STOCK ════════════ -->
+  <section class="section mesh" data-sec="featured" hidden>
     <div class="wrap">
       <div class="sec-head">
         <div class="t">
-          <span class="eyebrow">On the floor</span>
-          <h2 data-home="featuredTitle"></h2>
-          <p class="lead" data-home="featuredSub"></p>
+          <span class="sec-kicker" data-anim="up">On the floor</span>
+          <h2 data-home="featuredTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="featuredSub" data-anim="up" data-delay="2"></p>
         </div>
-        <a class="btn btn-out" href="inventory.html">View all stock</a>
+        <a class="btn btn-out" href="inventory.html" data-anim="up" data-delay="2">
+          View all stock
+        </a>
       </div>
       <div class="veh-grid" data-featured></div>
     </div>
   </section>
 
-  <!-- Finance -->
+  <!-- ══════════════════════════════════════════ MARQUES ═══════════════ -->
+  <section class="section tight alt" data-sec="makes" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="t">
+          <span class="sec-kicker" data-anim="up">Brands</span>
+          <h2 data-home="makesTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="makesSub" data-anim="up" data-delay="2"></p>
+        </div>
+      </div>
+      <div class="make-grid" data-makes></div>
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════════ HOW BUYING WORKS ═══════════════ -->
+  <section class="section has-ghost" data-sec="process" hidden>
+    <div class="wrap">
+      <span class="ghost-word" aria-hidden="true">Simple</span>
+      <div class="sec-head">
+        <div class="t">
+          <span class="sec-kicker" data-anim="up">The process</span>
+          <h2 data-home="processTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="processSub" data-anim="up" data-delay="2"></p>
+        </div>
+      </div>
+      <div class="grid g-4" data-process></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ FINANCE ═══════════════ -->
   <section class="section tight" data-sec="finance" hidden>
     <div class="wrap">
-      <div class="cta cta-split">
+      <div class="band-dark cta-split" data-anim="rise">
         <div>
-          <span class="eyebrow" style="color:var(--red-3)">Finance</span>
+          <span class="sec-kicker">Finance</span>
           <h2 data-home="financeTitle" style="margin-top:14px"></h2>
-          <p data-home="financeText"></p>
+          <p data-home="financeText" style="color:var(--text-inv-2);margin-top:14px;max-width:56ch"></p>
         </div>
         <div class="row">
-          <a class="btn btn-pri btn-lg" data-home-cta="financeCta"></a>
+          <a class="btn btn-pri btn-lg" data-home-cta="financeCta" data-magnetic></a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Latest arrivals -->
+  <!-- ═════════════════════════════════════ LATEST ARRIVALS ════════════ -->
   <section class="section alt" data-sec="latest" hidden>
     <div class="wrap">
       <div class="sec-head">
         <div class="t">
-          <span class="eyebrow">Just arrived</span>
-          <h2 data-home="latestTitle"></h2>
-          <p class="lead" data-home="latestSub"></p>
+          <span class="sec-kicker" data-anim="up">Just arrived</span>
+          <h2 data-home="latestTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="latestSub" data-anim="up" data-delay="2"></p>
         </div>
-        <a class="btn btn-out" href="inventory.html?sort=newest">See everything</a>
+        <a class="btn btn-out" href="inventory.html?sort=newest" data-anim="up" data-delay="2">
+          See everything
+        </a>
       </div>
       <div class="veh-grid" data-latest></div>
     </div>
   </section>
 
-  <!-- Body types -->
+  <!-- ═══════════════════════════════════════ BODY TYPES ═══════════════ -->
   <section class="section" data-sec="categories" hidden>
     <div class="wrap">
       <div class="sec-head">
         <div class="t">
-          <span class="eyebrow">Browse</span>
-          <h2 data-home="categoriesTitle"></h2>
-          <p class="lead" data-home="categoriesSub"></p>
+          <span class="sec-kicker" data-anim="up">Browse</span>
+          <h2 data-home="categoriesTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="categoriesSub" data-anim="up" data-delay="2"></p>
         </div>
       </div>
       <div class="cat-grid" data-categories></div>
     </div>
   </section>
 
-  <!-- Why buy from us -->
-  <section class="section alt" data-sec="why" hidden>
+  <!-- ══════════════════════════════════ WHAT YOU GET ══════════════════ -->
+  <section class="section alt tint" data-sec="promise" hidden>
     <div class="wrap">
       <div class="sec-head">
         <div class="t">
-          <span class="eyebrow">Why us</span>
-          <h2 data-home="whyTitle"></h2>
-          <p class="lead" data-home="whySub"></p>
+          <span class="sec-kicker" data-anim="up">Our promise</span>
+          <h2 data-home="promiseTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="promiseSub" data-anim="up" data-delay="2"></p>
+        </div>
+      </div>
+      <div class="grid g-2" data-promises></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════ WHY BUY FROM US ═══════════ -->
+  <section class="section" data-sec="why" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="t">
+          <span class="sec-kicker" data-anim="up">Why us</span>
+          <h2 data-home="whyTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="whySub" data-anim="up" data-delay="2"></p>
         </div>
       </div>
       <div class="grid g-2 why" data-why></div>
     </div>
   </section>
 
-  <!-- Testimonials. Hides itself when the portal holds no published
-       reviews, rather than showing filler. -->
+  <!-- ══════════════════════════════════════════ TIMELINE ══════════════ -->
+  <section class="section alt" data-sec="timeline" hidden>
+    <div class="wrap">
+      <div class="grid g-2" style="align-items:start;gap:clamp(26px,4vw,60px)">
+        <div class="stack">
+          <span class="sec-kicker" data-anim="up">Since 1999</span>
+          <h2 data-home="timelineTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="timelineSub" data-anim="up" data-delay="2"></p>
+          <div class="row" style="margin-top:6px" data-anim="up" data-delay="3">
+            <a class="btn btn-out" href="about.html">Read our story</a>
+          </div>
+        </div>
+        <div class="tl" data-timeline></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ REVIEWS ═══════════════ -->
   <section class="section" data-sec="testimonials" hidden>
     <div class="wrap">
       <div class="sec-head">
         <div class="t">
-          <span class="eyebrow">Reviews</span>
-          <h2 data-home="testimonialsTitle"></h2>
-          <p class="lead" data-home="testimonialsSub"></p>
+          <span class="sec-kicker" data-anim="up">Reviews</span>
+          <h2 data-home="testimonialsTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="testimonialsSub" data-anim="up" data-delay="2"></p>
         </div>
-        <a class="btn btn-out" href="testimonials.html">All reviews</a>
+        <a class="btn btn-out" href="testimonials.html" data-anim="up" data-delay="2">All reviews</a>
       </div>
       <div class="tm-grid" data-testimonials></div>
     </div>
   </section>
 
-  <!-- About preview -->
-  <section class="section alt" data-sec="about" hidden>
+  <!-- ═══════════════════════════════════════ RECENTLY SOLD ════════════ -->
+  <section class="section alt" data-sec="sold" hidden>
     <div class="wrap">
-      <div class="grid g-2" style="align-items:center;gap:clamp(24px,4vw,56px)">
-        <div class="stack" data-reveal>
-          <span class="eyebrow">About us</span>
+      <div class="sec-head">
+        <div class="t">
+          <span class="sec-kicker" data-anim="up">Moved on</span>
+          <h2 data-home="soldTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="soldSub" data-anim="up" data-delay="2"></p>
+        </div>
+        <a class="btn btn-out" href="contact.html" data-anim="up" data-delay="2">
+          Tell us what you want
+        </a>
+      </div>
+      <div class="veh-grid" data-sold></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ ABOUT ═════════════════ -->
+  <section class="section" data-sec="about" hidden>
+    <div class="wrap">
+      <div class="grid g-2" style="align-items:center;gap:clamp(26px,4vw,60px)">
+        <div class="stack" data-anim="right">
+          <span class="sec-kicker">About us</span>
           <h2 data-home="aboutTitle"></h2>
           <p class="lead" data-home="aboutText"></p>
           <div class="row" style="margin-top:6px">
             <a class="btn btn-dark" data-home-cta="aboutCta"></a>
           </div>
         </div>
-        <div data-about-rating></div>
+        <div data-about-rating data-anim="left" data-delay="1"></div>
       </div>
     </div>
   </section>
 
-  <!-- Trade-in -->
-  <section class="section" data-sec="tradein" hidden>
+  <!-- ══════════════════════════════════════════ TRADE-IN ══════════════ -->
+  <section class="section tight" data-sec="tradein" hidden>
     <div class="wrap">
-      <div class="cta cta-split">
+      <div class="band-dark cta-split" data-anim="rise">
         <div>
-          <span class="eyebrow" style="color:var(--red-3)">Sell or trade in</span>
+          <span class="sec-kicker">Sell or trade in</span>
           <h2 data-home="tradeinTitle" style="margin-top:14px"></h2>
-          <p data-home="tradeinText"></p>
+          <p data-home="tradeinText" style="color:var(--text-inv-2);margin-top:14px;max-width:56ch"></p>
         </div>
         <div class="row">
-          <a class="btn btn-pri btn-lg" data-home-cta="tradeinCta"></a>
+          <a class="btn btn-pri btn-lg" data-home-cta="tradeinCta" data-magnetic></a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Contact and map -->
+  <!-- ══════════════════════════════════════════════ FAQ ═══════════════ -->
+  <section class="section alt" data-sec="faq" hidden>
+    <div class="wrap" style="max-width:900px">
+      <div class="sec-head">
+        <div class="t">
+          <span class="sec-kicker" data-anim="up">Questions</span>
+          <h2 data-home="faqTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="faqSub" data-anim="up" data-delay="2"></p>
+        </div>
+      </div>
+      <div class="faq" data-faq></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ CLOSING BANNER ═══════════ -->
+  <section class="section" data-sec="banner" hidden>
+    <div class="wrap">
+      <div class="band-dark" style="text-align:center" data-anim="scale">
+        <h2 data-home="bannerTitle" style="max-width:22ch;margin-inline:auto"></h2>
+        <p data-home="bannerText"
+           style="color:var(--text-inv-2);margin:16px auto 0;max-width:58ch"></p>
+        <div class="row" style="justify-content:center;margin-top:28px">
+          <a class="btn btn-pri btn-lg" data-home-cta="bannerCta" data-magnetic></a>
+          <a class="btn btn-inv btn-lg" data-home-cta="bannerCta2"></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════ CONTACT AND MAP ═══════════ -->
   <section class="section alt" data-sec="contact" hidden>
     <div class="wrap">
       <div class="sec-head">
         <div class="t">
-          <span class="eyebrow">Visit us</span>
-          <h2 data-home="contactTitle"></h2>
-          <p class="lead" data-home="contactText"></p>
+          <span class="sec-kicker" data-anim="up">Visit us</span>
+          <h2 data-home="contactTitle" data-anim="up" data-delay="1"></h2>
+          <p class="lead" data-home="contactText" data-anim="up" data-delay="2"></p>
         </div>
       </div>
       <div class="grid g-2" style="align-items:start;gap:clamp(18px,2.4vw,30px)">
         <div data-contact-card></div>
-        <div class="map-box" data-sec="map" hidden>
+        <div class="map-box" data-sec="map" hidden data-anim="left" data-delay="1">
           <iframe title="Our location on Google Maps" loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade" data-biz="mapEmbed"></iframe>
         </div>
@@ -181,6 +312,7 @@
 
 <footer class="ftr" data-footer></footer>
 <div data-wa-float></div>
+<div data-compare-tray></div>
 
 <noscript>
   <div class="wrap" style="padding:40px 0">
@@ -193,10 +325,13 @@
 
 <script src="js/config.js"></script>
 <script src="js/core.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/fallback.js"></script>
 <script src="js/data.js"></script>
 <script src="js/site.js"></script>
+<script src="js/forms.js"></script>
 <script src="js/vehicle-card.js"></script>
+<script src="js/compare.js"></script>
 <script src="js/home.js"></script>
 </body>
 </html>

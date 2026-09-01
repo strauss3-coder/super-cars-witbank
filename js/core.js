@@ -113,6 +113,17 @@ var s = function(p){
          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';
 };
 SC.icon = {
+  chevD:s('<path d="M5.5 9l6.5 6.5L18.5 9"/>'),
+  heart:s('<path d="M12 20.5l-1.5-1.4C5.4 14.5 2 11.4 2 7.6 2 4.9 4.1 3 6.8 3c1.6 0 3.1.7 4 1.9l1.2 1.5 1.2-1.5A5.2 5.2 0 0117.2 3C19.9 3 22 4.9 22 7.6c0 3.8-3.4 6.9-8.5 11.5z"/>'),
+  heartFill:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20.5l-1.5-1.4C5.4 14.5 2 11.4 2 7.6 2 4.9 4.1 3 6.8 3c1.6 0 3.1.7 4 1.9l1.2 1.5 1.2-1.5A5.2 5.2 0 0117.2 3C19.9 3 22 4.9 22 7.6c0 3.8-3.4 6.9-8.5 11.5z"/></svg>',
+  scales:s('<path d="M12 3v18M7 21h10M3 8l4-4 4 4M3 8a4 4 0 008 0M13 8l4-4 4 4M13 8a4 4 0 008 0"/>'),
+  award:s('<circle cx="12" cy="9" r="6"/><path d="M8.2 13.9L7 22l5-2.6L17 22l-1.2-8.1"/>'),
+  quote:s('<path d="M9.5 6C6.5 7.4 5 10 5 13.2V18h5.6v-5.6H8.2c0-2 .6-3.4 2.4-4.4zM19 6c-3 1.4-4.5 4-4.5 7.2V18h5.6v-5.6h-2.4c0-2 .6-3.4 2.4-4.4z"/>'),
+  zap:s('<path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z"/>'),
+  clock2:s('<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/>'),
+  handshake:s('<path d="M11 17l2 2 4-4"/><path d="M2 11.5l4-4 4.5 4.5a2 2 0 002.8 0L18 7.5l4 4"/><path d="M6 7.5h4M14 7.5h4"/>'),
+  sparkle:s('<path d="M12 3l1.7 4.6L18 9.3l-4.3 1.7L12 15.6l-1.7-4.6L6 9.3l4.3-1.7L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/>'),
+  doc:s('<path d="M13.5 2.5H7a2 2 0 00-2 2v15a2 2 0 002 2h10a2 2 0 002-2V8l-5.5-5.5z"/><path d="M13.5 2.5V8H19"/>'),
   car:s('<path d="M5 17h14M6.5 17a1.8 1.8 0 11-3.5 0 1.8 1.8 0 013.5 0zM21 17a1.8 1.8 0 11-3.5 0 1.8 1.8 0 013.5 0z"/><path d="M3 14l1.6-5.2A2 2 0 016.5 7.4h11a2 2 0 011.9 1.4L21 14v3H3v-3z"/><path d="M6 11h12"/>'),
   gauge:s('<circle cx="12" cy="12" r="9"/><path d="M12 12l4-4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>'),
   fuel:s('<path d="M4 21V5a2 2 0 012-2h6a2 2 0 012 2v16"/><path d="M3 21h12"/><path d="M14 9h3a2 2 0 012 2v6a1.5 1.5 0 003 0V9l-3-3"/><path d="M6 8h6"/>'),
@@ -238,27 +249,14 @@ SC.lightbox = (function(){
   };
 })();
 
-/* -------------------------------------------------------------- reveal -- */
-/* Adds .in to [data-reveal] as it scrolls into view. Falls back to showing
-   everything at once where IntersectionObserver is missing. */
-SC.reveal = function(root){
-  var nodes = U.els('[data-reveal]:not(.in)', root||document);
-  if(!nodes.length) return;
-  if(!('IntersectionObserver' in window)){
-    nodes.forEach(function(n){ n.classList.add('in'); });
-    return;
-  }
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if(!en.isIntersecting) return;
-      var d = Number(en.target.dataset.reveal) || 0;
-      setTimeout(function(){ en.target.classList.add('in'); }, d*70);
-      io.unobserve(en.target);
-    });
-  },{rootMargin:'0px 0px -8% 0px',threshold:.06});
-  nodes.forEach(function(n){ io.observe(n); });
-};
+/* -------------------------------------------------------- reveal safety -- */
+/* js/motion.js owns the reveal. This is only the net beneath it: if that file
+   fails to load or throws, anything still waiting is shown rather than left
+   invisible. Content must never depend on an animation arriving. */
+setTimeout(function(){
+  U.els('[data-anim]:not(.in)').forEach(function(n){ n.classList.add('in','done'); });
+  U.els('[data-reveal]:not(.in)').forEach(function(n){ n.classList.add('in'); });
+}, 2600);
 
-document.addEventListener('DOMContentLoaded',function(){ SC.reveal(); });
 
 })();

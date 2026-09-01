@@ -20,7 +20,7 @@ Promise.all([SC.site, SC.data.settings(), SC.data.vehicles()]).then(function(r){
   paintOpenNow(biz);
   paintDetails(biz);
   paintForm(biz, vehicles);
-  SC.reveal();
+  SC.scan(document); SC.fadeImages(document);
 }).catch(function(err){
   console.error('[contact] '+err.message);
   U.el('[data-contact-form]').innerHTML =

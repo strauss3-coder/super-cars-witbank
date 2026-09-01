@@ -27,7 +27,7 @@ Promise.all([SC.site, SC.data.settings()]).then(function(r){
   paintTeam(about);
   paintLocation(biz);
 
-  SC.reveal();
+  SC.scan(document); SC.fadeImages(document);
 }).catch(function(err){ console.error('[about] '+err.message); });
 
 function paintStory(about){

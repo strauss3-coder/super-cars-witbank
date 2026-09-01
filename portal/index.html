@@ -1055,7 +1055,7 @@ const MAP = {
 };
 
 /* The settings documents. Each is one row in site_settings. */
-const SETTINGS_KEYS = ['homepage','about','finance','sell','business','navigation','footer','legal','seo'];
+const SETTINGS_KEYS = ['homepage','about','finance','sell','business','navigation','footer','legal','seo','announce'];
 
 const Cloud = {
   SES:'sc_portal_session', Q:'sc_portal_queue', CACHE:'sc_portal_cache',
@@ -1356,7 +1356,7 @@ const Store = {
       vehicles:[], testimonials:[], enquiries:[], financeApps:[], tradeins:[],
       media:[], users:[], activity:[], views:[],
       homepage:{}, about:{}, finance:{}, sell:{},
-      business:{}, navigation:{}, footer:{}, legal:{}, seo:{},
+      business:{}, navigation:{}, footer:{}, legal:{}, seo:{}, announce:{},
       meta:{ lastSaved:0 }
     };
   },
@@ -4201,25 +4201,35 @@ function fmtBytes(n){
 
 /* ==================================================================
    MODULE  ·  Homepage Editor
-   Every string, every count and every switch here renders on the home
-   page. Nothing on that page is hardcoded.
+   Every string, count, icon and switch on this page renders on the
+   home page. Nothing on that page is hardcoded.
    ================================================================== */
 Portal.register({
-  id:'homepage', title:'Homepage Editor', sub:'Hero, sections and copy', icon:'home',
+  id:'homepage', title:'Homepage Editor', sub:'Every section of the home page', icon:'home',
   group:'Website', instant:true,
   state:{ tab:'hero' },
+
+  /* Which repeaters appear on which tab, in the order they are rendered.
+     bindMulti pairs them up with their arrays by position. */
+  reps:{
+    trust:['trust'], figures:['stats'], listings:['categories'],
+    process:['process'], promise:['promises','why'], questions:['faq']
+  },
 
   render(){
     const d = Store.doc('homepage');
     if(!d.sections) d.sections = {};
-    const s = this.state;
-    const secs = d.sections;
+    const s = this.state, secs = d.sections;
 
-    const tabs = [['hero','Hero'],['stats','Figures'],['sections','Sections'],
-                  ['why','Why buy from us'],['copy','Panels'],['switches','Show or hide']];
+    const tabs = [
+      ['hero','Hero'],['trust','Trust badges'],['figures','Figures'],
+      ['listings','Stock sections'],['process','How it works'],
+      ['promise','Promise and reasons'],['questions','Questions'],
+      ['panels','Panels'],['switches','Show or hide']
+    ];
 
     return `
-    ${H.head('Homepage Editor','Everything on the home page, in the order it appears.',`
+    ${H.head('Homepage Editor','Everything on the home page, in the order a visitor meets it.',`
       <button class="btn" data-act="preview">${ICON.ext} View the page</button>`)}
 
     <div class="card" style="margin-bottom:14px"><div class="card-b">
@@ -4230,57 +4240,136 @@ Portal.register({
     <div data-hp>${pane()}</div>`;
 
     function pane(){
-      if(s.tab === 'hero') return H.card('The hero','The first thing a visitor sees',`
-        <div class="grid" style="gap:13px">
-          ${H.field('Small badge above the heading',H.input('heroBadge',d.heroBadge,''),
-            'Leave blank to hide it.')}
-          ${H.field('Heading',H.input('heroTitle',d.heroTitle,'Quality pre-owned vehicles.'))}
-          ${H.field('Second line, in red',H.input('heroTitleAccent',d.heroTitleAccent,'Priced to move.'),
-            'Shown underneath the heading in your brand red. Leave blank for a single line.')}
-          ${H.field('Introduction',H.ta('heroSubtitle',d.heroSubtitle,'',3))}
-          <div class="sep"></div>
-          <div class="f2">
-            ${H.field('Main button',H.input('ctaPrimary.text',(d.ctaPrimary||{}).text,'Browse our stock'))}
-            ${H.field('Main button link',H.input('ctaPrimary.link',(d.ctaPrimary||{}).link,'inventory.html'))}
-          </div>
-          <div class="f2">
-            ${H.field('Second button',H.input('ctaSecondary.text',(d.ctaSecondary||{}).text,'Get finance'))}
-            ${H.field('Second button link',H.input('ctaSecondary.link',(d.ctaSecondary||{}).link,'finance.html'))}
-          </div>
-          <div class="sep"></div>
-          ${H.toggleCard('searchEnabled',d.searchEnabled !== false,'Search panel',
-            'The make, body and price search beside the hero','ok','search')}
-          ${H.field('Search box placeholder',H.input('searchPlaceholder',d.searchPlaceholder,''))}
-        </div>`);
+      /* ---------------------------------------------------------- hero -- */
+      if(s.tab === 'hero') return `
+        <div class="grid" style="gap:14px">
+          ${H.card('The heading','The first thing a visitor reads',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Small badge above the heading',H.input('heroBadge',d.heroBadge,''),
+                'Sits in a glass pill with a pulsing dot. Leave blank to hide it.')}
+              ${H.field('Heading',H.input('heroTitle',d.heroTitle,'Quality pre-owned vehicles.'))}
+              ${H.field('Second line, in red',H.input('heroTitleAccent',d.heroTitleAccent,'Priced to move.'),
+                'Shown underneath in your brand colour. Leave blank for a single line.')}
+              ${H.field('Introduction',H.ta('heroSubtitle',d.heroSubtitle,'',3))}
+            </div>`)}
 
-      if(s.tab === 'stats') return H.card('Headline figures','The four numbers under the hero',`
+          ${H.card('Background','',`
+            <div class="grid" style="gap:13px">
+              <p class="hint">The hero has a layered dark background with a slow moving glow
+              built in. A photograph is optional and sits behind that glow at low opacity, so
+              a busy picture still reads as a background rather than fighting the text.</p>
+              <div class="sp" style="align-items:flex-end">
+                ${d.heroPhoto
+                  ? `<div style="width:120px;height:70px;border-radius:9px;overflow:hidden;background:var(--raise-2)">
+                       <img src="${U.esc(d.heroPhoto)}" alt="" style="width:100%;height:100%;object-fit:cover">
+                     </div>`
+                  : `<div style="width:120px;height:70px;border-radius:9px;background:var(--raise-2);
+                       display:grid;place-items:center;color:var(--text-3)">${ICON.image}</div>`}
+                <button class="btn btn-sm" data-hero-pic>${ICON.upload} ${d.heroPhoto?'Replace':'Upload a photograph'}</button>
+                ${d.heroPhoto?'<button class="btn btn-sm btn-ghost" data-hero-nopic>Remove</button>':''}
+                <input type="file" accept="image/*" hidden data-hero-file>
+              </div>
+              ${H.field('Or paste a link',H.input('heroPhoto',d.heroPhoto,''))}
+            </div>`)}
+
+          ${H.card('Buttons','',`
+            <div class="grid" style="gap:13px">
+              <div class="f2">
+                ${H.field('Main button',H.input('ctaPrimary.text',(d.ctaPrimary||{}).text,'Browse our stock'))}
+                ${H.field('Main button link',H.input('ctaPrimary.link',(d.ctaPrimary||{}).link,'inventory.html'))}
+              </div>
+              <div class="f2">
+                ${H.field('Second button',H.input('ctaSecondary.text',(d.ctaSecondary||{}).text,'Get finance'))}
+                ${H.field('Second button link',H.input('ctaSecondary.link',(d.ctaSecondary||{}).link,'finance.html'))}
+              </div>
+            </div>`)}
+
+          ${H.card('Search panel','The make, body and price search beside the heading',`
+            ${H.field('Placeholder text',H.input('searchPlaceholder',d.searchPlaceholder,''))}
+            <p class="hint" style="margin-top:11px">The makes, body types and price bands it offers
+            are built from your live stock, so a customer can never pick a filter that returns
+            nothing. Switch the whole panel off under Show or hide.</p>`)}
+        </div>`;
+
+      /* --------------------------------------------------------- trust -- */
+      if(s.tab === 'trust') return H.card('Trust badges',
+        'The glass pills under the hero. Keep them to four; more and none of them land.',`
+        ${H.repeater({
+          label:'Badge', items:d.trust||[],
+          fields:[
+            {k:'icon', label:'Icon', type:'select',
+             opts:['award','star','shield','bank','check','clock2','handshake','sparkle','car','key']},
+            {k:'value',label:'The bold part',ph:'25+'},
+            {k:'label',label:'The rest',ph:'Years on Watermeyer Street'}
+          ]
+        })}`);
+
+      /* ------------------------------------------------------- figures -- */
+      if(s.tab === 'figures') return H.card('Headline figures',
+        'The four numbers in the band under the hero. They count up as they come into view.',`
         <div class="note info" style="margin-bottom:14px">${ICON.info}
-          <div>Type <b>auto</b> as the value and the website counts your live stock itself,
-          so that figure can never go stale.</div></div>
+          <div>Type <b>auto</b> as the value and the website counts your live stock itself, so
+          that figure can never go stale. A value like <b>25+</b> or <b>4.8</b> animates the
+          number and keeps the suffix.</div></div>
         ${H.repeater({
           label:'Figure', items:d.stats||[],
           fields:[
             {k:'value',label:'Value',ph:'25+ or 4.8 or auto'},
             {k:'label',label:'Label',ph:'Years in business'},
-            {k:'sub',label:'Small text underneath',ph:'Serving eMalahleni'}
+            {k:'sub',  label:'Small text underneath',ph:'Serving eMalahleni'}
           ]
         })}`);
 
-      if(s.tab === 'sections') return `
+      /* ------------------------------------------------------ listings -- */
+      if(s.tab === 'listings') return `
         <div class="grid" style="gap:14px">
           ${H.card('Featured stock','The hand-picked row near the top',`
             <div class="grid" style="gap:13px">
               ${H.field('Heading',H.input('featuredTitle',d.featuredTitle,''))}
               ${H.field('Sub-heading',H.input('featuredSub',d.featuredSub,''))}
               ${H.field('How many to show',H.input('featuredCount',d.featuredCount,'4','number'),
-                'Mark a vehicle as Featured in Vehicle Management to put it here. If nothing is featured, the newest stock is shown instead.')}
+                'Mark a vehicle Featured in Vehicle Management to put it here. With nothing featured, the newest stock is shown instead.')}
             </div>`)}
-          ${H.card('Latest arrivals','The newest stock',`
+
+          ${H.card('Latest arrivals','',`
             <div class="grid" style="gap:13px">
               ${H.field('Heading',H.input('latestTitle',d.latestTitle,''))}
               ${H.field('Sub-heading',H.input('latestSub',d.latestSub,''))}
               ${H.field('How many to show',H.input('latestCount',d.latestCount,'6','number'))}
             </div>`)}
+
+          ${H.card('Recently sold','Proof that stock moves. Hides itself until something is marked sold.',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('soldTitle',d.soldTitle,''))}
+              ${H.field('Sub-heading',H.input('soldSub',d.soldSub,''))}
+              ${H.field('How many to show',H.input('soldCount',d.soldCount,'4','number'))}
+            </div>`)}
+
+          ${H.card('Marques','The badge tiles. Built from your live stock, so a make appears the day one arrives.',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('makesTitle',d.makesTitle,''))}
+              ${H.field('Sub-heading',H.input('makesSub',d.makesSub,''))}
+              <p class="hint">Without a logo the make is shown as a wordmark, which is legible and
+              honest. Add a logo per make only if you have a clean transparent PNG of it.</p>
+              <div class="grid" style="gap:9px">
+                ${(()=>{
+                  const makes = [...new Set(Store.list('vehicles')
+                    .filter(v=>!v.archived && !v.sold && v.make).map(v=>v.make))].sort();
+                  if(!makes.length) return '<p class="hint">No stock yet, so there are no marques to show.</p>';
+                  const logos = d.makeLogos||{};
+                  return makes.map(m=>`
+                    <div class="toggle-card">
+                      ${logos[m]
+                        ? `<img src="${U.esc(logos[m])}" alt="" style="width:44px;height:28px;object-fit:contain">`
+                        : `<div class="li-ic">${ICON.car}</div>`}
+                      <div><b style="font-size:13px">${U.esc(m)}</b></div>
+                      <input class="inp" data-logo="${U.esc(m)}" value="${U.esc(logos[m]||'')}"
+                             placeholder="Logo link, optional" style="max-width:280px">
+                    </div>`).join('');
+                })()}
+              </div>
+            </div>`)}
+
           ${H.card('Body types','The tiles a visitor taps to filter the stock list',`
             <div class="grid" style="gap:13px">
               ${H.field('Heading',H.input('categoriesTitle',d.categoriesTitle,''))}
@@ -4291,64 +4380,150 @@ Portal.register({
                 label:'Tile', items:d.categories||[],
                 fields:[
                   {k:'label',label:'Shown as',ph:'Bakkies'},
-                  {k:'body',label:'Body type it filters by',type:'select',opts:BODIES}
+                  {k:'body', label:'Body type it filters by',type:'select',opts:BODIES}
                 ]
               })}
             </div>`)}
-          ${H.card('Reviews','The row of customer reviews',`
-            <div class="grid" style="gap:13px">
-              ${H.field('Heading',H.input('testimonialsTitle',d.testimonialsTitle,''))}
-              ${H.field('Sub-heading',H.input('testimonialsSub',d.testimonialsSub,''))}
-              ${H.field('How many to show',H.input('testimonialsCount',d.testimonialsCount,'3','number'),
-                'If nothing is published in Testimonials, this whole section hides itself.')}
-            </div>`)}
         </div>`;
 
-      if(s.tab === 'why') return H.card('Why buy from us','The four reasons block',`
+      /* ------------------------------------------------------- process -- */
+      if(s.tab === 'process') return H.card('How buying works',
+        'The numbered steps. Four works best; the row wraps awkwardly at five.',`
         <div class="grid" style="gap:13px">
-          ${H.field('Heading',H.input('whyTitle',d.whyTitle,''))}
-          ${H.field('Sub-heading',H.input('whySub',d.whySub,''))}
+          ${H.field('Heading',H.input('processTitle',d.processTitle,''))}
+          ${H.field('Sub-heading',H.input('processSub',d.processSub,''))}
           ${H.repeater({
-            label:'Reason', items:d.why||[],
+            label:'Step', items:d.process||[],
             fields:[
-              {k:'icon',label:'Icon',type:'select',opts:['shield','bank','swap','star','check','car','key','clock']},
-              {k:'title',label:'Heading',ph:'Every car checked'},
-              {k:'text',label:'Text',type:'textarea',rows:2}
+              {k:'icon', label:'Icon', type:'select',
+               opts:['search','key','bank','handshake','check','car','doc','clock2','shield','swap']},
+              {k:'title',label:'Heading',ph:'Find the car'},
+              {k:'text', label:'Text',type:'textarea',rows:2}
             ]
           })}
         </div>`);
 
-      if(s.tab === 'copy') return `
+      /* ------------------------------------------------------- promise -- */
+      if(s.tab === 'promise') return `
+        <div class="grid" style="gap:14px">
+          ${H.card('What you get from us','The promises block',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('promiseTitle',d.promiseTitle,''))}
+              ${H.field('Sub-heading',H.input('promiseSub',d.promiseSub,''))}
+              ${H.repeater({
+                label:'Promise', items:d.promises||[],
+                fields:[
+                  {k:'icon', label:'Icon', type:'select',
+                   opts:['shield','doc','swap','phone','check','award','handshake','clock2','bank']},
+                  {k:'title',label:'Heading'},
+                  {k:'text', label:'Text',type:'textarea',rows:2}
+                ]
+              })}
+            </div>`)}
+
+          ${H.card('Why buy from us','The four reasons further down',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('whyTitle',d.whyTitle,''))}
+              ${H.field('Sub-heading',H.input('whySub',d.whySub,''))}
+              ${H.repeater({
+                label:'Reason', items:d.why||[],
+                fields:[
+                  {k:'icon', label:'Icon', type:'select',
+                   opts:['shield','bank','swap','star','check','car','key','clock2','award']},
+                  {k:'title',label:'Heading'},
+                  {k:'text', label:'Text',type:'textarea',rows:2}
+                ]
+              })}
+            </div>`)}
+        </div>`;
+
+      /* ----------------------------------------------------- questions -- */
+      if(s.tab === 'questions') return H.card('Questions we get asked',
+        'The accordion near the bottom. Also published as structured data, so these can appear directly in Google.',`
+        <div class="grid" style="gap:13px">
+          ${H.field('Heading',H.input('faqTitle',d.faqTitle,''))}
+          ${H.field('Sub-heading',H.input('faqSub',d.faqSub,''))}
+          ${H.repeater({
+            label:'Question', items:d.faq||[],
+            fields:[
+              {k:'q',label:'Question',ph:'Do you take trade-ins?'},
+              {k:'a',label:'Answer',type:'textarea',rows:3}
+            ]
+          })}
+        </div>`);
+
+      /* -------------------------------------------------------- panels -- */
+      if(s.tab === 'panels') return `
         <div class="grid" style="gap:14px">
           ${panel('About preview','aboutTitle','aboutText','aboutCta')}
           ${panel('Finance panel','financeTitle','financeText','financeCta')}
           ${panel('Trade-in panel','tradeinTitle','tradeinText','tradeinCta')}
+
+          ${H.card('Timeline','',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('timelineTitle',d.timelineTitle,''))}
+              ${H.field('Sub-heading',H.input('timelineSub',d.timelineSub,''))}
+              <p class="hint">The milestones themselves are the ones on the About page, edited under
+              Website Content. The story is written once and told in both places.</p>
+            </div>`)}
+
+          ${H.card('Closing banner','The last thing before the contact block',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('bannerTitle',d.bannerTitle,''))}
+              ${H.field('Text',H.ta('bannerText',d.bannerText,'',2))}
+              <div class="f2">
+                ${H.field('Main button',H.input('bannerCta.text',(d.bannerCta||{}).text,''))}
+                ${H.field('Main button link',H.input('bannerCta.link',(d.bannerCta||{}).link,''))}
+              </div>
+              <div class="f2">
+                ${H.field('Second button',H.input('bannerCta2.text',(d.bannerCta2||{}).text,''))}
+                ${H.field('Second button link',H.input('bannerCta2.link',(d.bannerCta2||{}).link,''))}
+              </div>
+            </div>`)}
+
+          ${H.card('Reviews row','',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('testimonialsTitle',d.testimonialsTitle,''))}
+              ${H.field('Sub-heading',H.input('testimonialsSub',d.testimonialsSub,''))}
+              ${H.field('How many to show',H.input('testimonialsCount',d.testimonialsCount,'3','number'),
+                'With nothing published in Testimonials this whole section hides itself.')}
+            </div>`)}
+
           ${H.card('Contact panel','The block above the map',`
             <div class="grid" style="gap:13px">
               ${H.field('Heading',H.input('contactTitle',d.contactTitle,''))}
               ${H.field('Text',H.ta('contactText',d.contactText,'',2))}
-              <p class="hint">The address, telephone numbers and opening hours in this panel come
-              from Business Information, so they are only ever typed once.</p>
+              <p class="hint">The address, numbers and opening hours in this panel come from
+              Business Information, so they are only ever typed once.</p>
             </div>`)}
         </div>`;
 
-      /* switches */
+      /* ------------------------------------------------------ switches -- */
       const rows = [
         ['hero','The hero','Heading, introduction and buttons'],
-        ['search','Search panel','Beside the hero'],
-        ['stats','Headline figures','The four numbers'],
+        ['search','Search panel','Beside the heading'],
+        ['trust','Trust badges','The glass pills under the hero'],
+        ['stats','Headline figures','The counting number band'],
         ['featured','Featured stock','Hand-picked vehicles'],
-        ['finance','Finance panel','The dark finance call to action'],
+        ['makes','Marques','The badge tiles'],
+        ['process','How buying works','The numbered steps'],
+        ['finance','Finance panel','Dark call to action'],
         ['latest','Latest arrivals','Newest stock'],
         ['categories','Body types','The filter tiles'],
+        ['promise','What you get','The promises block'],
         ['why','Why buy from us','The four reasons'],
+        ['timeline','Timeline','Milestones since 1999'],
         ['testimonials','Reviews','Customer reviews'],
+        ['sold','Recently sold','Cars that have moved'],
         ['about','About preview','With your Google rating'],
         ['tradein','Trade-in panel','Sell your car call to action'],
+        ['faq','Questions','The accordion'],
+        ['banner','Closing banner','The last call to action'],
         ['contact','Contact panel','Address, hours and numbers'],
         ['map','Map','Google map of the dealership']
       ];
-      return H.card('Show or hide sections','Switch a section off and it leaves the page entirely',`
+      return H.card('Show or hide sections',
+        'Switch a section off and it leaves the page entirely rather than being hidden.',`
         <div class="grid" style="gap:9px">
           ${rows.map(([k,l,sub])=>
             H.toggleCard('sections.'+k, secs[k] !== false, l, sub,
@@ -4377,8 +4552,13 @@ Portal.register({
     U.on(root,'click','[data-tab]',(e,b)=>{ s.tab = b.dataset.tab; Router.refresh(); });
     U.on(root,'click','[data-act="preview"]',()=>window.open(WEBSITE_URL,'_blank','noopener'));
 
+    const save = ()=>{
+      Store.saveDoc('homepage');
+      Store.log('Homepage edited','The home page has been updated','home');
+    };
+
     /* Dotted keys such as ctaPrimary.text and sections.hero write into the
-       nested object rather than creating a literal key with a full stop. */
+       nested object rather than creating a key with a full stop in it. */
     H.bind(root,(k,v)=>{
       if(k.indexOf('.') > -1){
         const [a,b] = k.split('.');
@@ -4387,19 +4567,51 @@ Portal.register({
       }else{
         d[k] = v;
       }
-    },()=>{
-      Store.saveDoc('homepage');
-      Store.log('Homepage edited','The home page has been updated','home');
+    },save);
+
+    /* Per-make logo overrides, keyed by the make itself. */
+    U.on(root,'input','[data-logo]',U.debounce((e,el)=>{
+      if(!d.makeLogos) d.makeLogos = {};
+      const v = el.value.trim();
+      if(v) d.makeLogos[el.dataset.logo] = v;
+      else delete d.makeLogos[el.dataset.logo];
+      save();
+    },480));
+
+    /* Hero photograph. */
+    const file = U.el('[data-hero-file]',root);
+    const pick = U.el('[data-hero-pic]',root);
+    if(pick && file){
+      pick.addEventListener('click',()=>file.click());
+      file.addEventListener('change',U.guard(async()=>{
+        const f = file.files[0];
+        if(!f) return;
+        try{
+          const img = await U.readImage(f,2200,.84);
+          const up = await Cloud.uploadImage('branding',img.dataUrl,'hero');
+          d.heroPhoto = up.url;
+          Store.insert('media',{
+            id:U.id('m'), url:up.url, bucket:up.bucket, path:up.path,
+            name:'Hero background', folder:'hero', kind:'image',
+            bytes:up.bytes, width:img.width, height:img.height
+          });
+          save(); Router.refresh();
+          UI.toast('ok','Hero photograph set','It sits behind the glow on the home page.');
+        }catch(err){ UI.toast('err','That did not upload',err.message); }
+        file.value = '';
+      }));
+    }
+    const drop = U.el('[data-hero-nopic]',root);
+    if(drop) drop.addEventListener('click',()=>{
+      d.heroPhoto = ''; save(); Router.refresh();
+      UI.toast('ok','Photograph removed','The hero uses its built-in background.');
     });
 
-    /* The repeaters on the Figures, Body types and Why tabs. */
-    const arrayKey = { stats:'stats', sections:'categories', why:'why' }[s.tab];
-    if(arrayKey){
-      if(!Array.isArray(d[arrayKey])) d[arrayKey] = [];
-      H.bindRepeater(root,()=>d[arrayKey],()=>{
-        Store.saveDoc('homepage');
-        Store.log('Homepage edited','The home page has been updated','home');
-      },()=>Router.refresh());
+    /* The repeaters on this tab, in the order they were rendered. */
+    const keys = this.reps[s.tab];
+    if(keys){
+      keys.forEach(k=>{ if(!Array.isArray(d[k])) d[k] = []; });
+      bindMulti(root,d,keys,save);
     }
   }
 });
@@ -4942,6 +5154,88 @@ Portal.register({
     if(rm) rm.addEventListener('click',()=>{
       d.logo = ''; save(); Router.refresh();
       UI.toast('ok','Logo removed','The SC monogram is shown instead.');
+    });
+  }
+});
+
+/* ==================================================================
+   MODULE  ·  Announcement Bar
+   The strip above the header on every page. Off unless it is needed,
+   because a banner that is always there stops being read.
+   ================================================================== */
+Portal.register({
+  id:'announce', title:'Announcement Bar', sub:'A strip above the header', icon:'sparkles',
+  group:'Website', instant:true,
+  badge(){ return Store.doc('announce').enabled ? {text:'On',mut:true} : null; },
+
+  render(){
+    const d = Store.doc('announce');
+    const live = d.enabled && d.text;
+
+    return `
+    ${H.head('Announcement Bar','One line across the top of every page.',`
+      <button class="btn" data-act="preview">${ICON.ext} View the website</button>`)}
+
+    <div class="grid" style="gap:14px">
+      ${H.card('Preview','Exactly what a visitor sees',
+        live
+          ? `<div style="background:linear-gradient(96deg,#B01B21,#D42128 45%,#E8564C);color:#fff;
+                 border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;
+                 justify-content:center;gap:11px;font-size:13.5px;font-weight:620;text-align:center">
+               ${ICON[d.icon]||ICON.sparkles}
+               <span>${U.esc(d.text)}${d.link&&d.linkText
+                 ? ` <u style="font-weight:730">${U.esc(d.linkText)}</u>` : ''}</span>
+             </div>
+             <p class="hint" style="margin-top:11px">A visitor who dismisses it is not shown it
+             again for the rest of their visit. Editing the wording brings it back for
+             everyone, including those who dismissed the previous message.</p>`
+          : H.empty('sparkles','Nothing is showing',
+              d.enabled ? 'The bar is switched on but has no wording, so nothing renders.'
+                        : 'The bar is off. Switch it on below when you have something to say.'))}
+
+      ${H.card('The message','',`
+        <div class="grid" style="gap:13px">
+          ${H.toggleCard('enabled',!!d.enabled,'Show the bar',
+            'Turn it off again when the message is stale','ok','globe')}
+          ${H.field('Wording',H.ta('text',d.text,
+            'For example: Closed for the public holiday on Monday. Back Tuesday at 08:00.',2),
+            'One sentence. It has to be readable at a glance on a phone.')}
+          <div class="f3">
+            ${H.field('Icon',H.sel('icon',d.icon||'sparkles',
+              ['sparkles','warn','info','tag','car','clock','phone','bank','star']))}
+            ${H.field('Link text',H.input('linkText',d.linkText,'See the stock'),'Optional.')}
+            ${H.field('Link goes to',H.input('link',d.link,'inventory.html'))}
+          </div>
+        </div>`)}
+
+      ${H.card('What it is for','',`
+        <div class="grid" style="gap:11px">
+          ${[
+            ['A holiday closure','So somebody does not drive to Watermeyer Street on a day you are shut.'],
+            ['A price event','A weekend sale, or a run of cars that has just been reduced.'],
+            ['New stock landing','When a batch arrives and you want it seen before it is listed properly.'],
+            ['Anything urgent','A moved phone number, a road closure outside the gate.']
+          ].map(([a,b])=>`
+            <div class="kv-row" style="align-items:flex-start">
+              <span style="flex:1"><b style="color:var(--text);display:block;font-size:13px">${a}</b>
+              <small style="color:var(--text-3)">${b}</small></span></div>`).join('')}
+        </div>
+        <div class="note warn" style="margin-top:14px">${ICON.warn}
+          <div>Take it down when it stops being true. A banner that is always there is one
+          nobody reads, and it costs you the one time it matters.</div></div>`)}
+    </div>`;
+  },
+
+  mount(root){
+    const d = Store.doc('announce');
+    U.on(root,'click','[data-act="preview"]',()=>window.open(WEBSITE_URL,'_blank','noopener'));
+
+    H.bind(root,(k,v)=>{ d[k] = v; },()=>{
+      Store.saveDoc('announce');
+      Store.log('Announcement bar edited',
+        d.enabled && d.text ? 'Showing: '+String(d.text).slice(0,50) : 'Switched off','sparkles');
+      clearTimeout(Portal.byId.announce._t);
+      Portal.byId.announce._t = setTimeout(()=>Router.refresh(),700);
     });
   }
 });
@@ -5933,7 +6227,7 @@ const Router = {
      protection: a sales account that typed the address by hand would get
      an empty page rather than data. */
   allowed(mod){
-    if(['homepage','content','business','seo'].indexOf(mod.id) > -1) return Cloud.can('settings');
+    if(['homepage','content','business','seo','announce'].indexOf(mod.id) > -1) return Cloud.can('settings');
     if(mod.id === 'users') return Cloud.role === 'admin';
     return true;
   },

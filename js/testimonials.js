@@ -28,7 +28,7 @@ Promise.all([SC.site, SC.data.settings(), SC.data.testimonials()]).then(function
   paintRating(biz, list);
   paintReviews(list, biz);
   paintReviewLink(biz);
-  SC.reveal();
+  SC.scan(document); SC.fadeImages(document);
 }).catch(function(err){
   console.error('[testimonials] '+err.message);
   host.innerHTML = '<div class="empty" style="grid-column:1/-1">'+SC.icon.warn+
