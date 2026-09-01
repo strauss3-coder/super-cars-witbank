@@ -90,13 +90,30 @@ below connect it to a database so staff can start editing it.
 address and tick *Auto Confirm User*.
 
 **3. Put yourself on the staff list.** Nothing works until you do, and that is
-deliberate — an account that is not listed sees nothing at all.
+deliberate — an account that is not listed can sign in and still see nothing.
+Do this **after** step 2, not before.
 
 ```sql
-insert into public.portal_users (user_id, email, name, role)
-select id, email, 'Owner', 'admin' from auth.users
-where email = 'you@supercars-witbank.co.za'
-on conflict (user_id) do update set role = 'admin', active = true;
+-- Order matters: the account must exist in Authentication FIRST. This reads
+-- from auth.users, and an insert...select over an empty result inserts nothing
+-- and still reports success — so it is made to raise instead of failing quietly.
+do $$
+declare uid uuid;
+begin
+  select id into uid from auth.users where email = 'you@supercars-witbank.co.za';
+  if uid is null then
+    raise exception 'No account with that email exists yet. Create it first under Authentication -> Users -> Add user, ticking Auto Confirm User.';
+  end if;
+
+  insert into public.portal_users (user_id, email, name, role, active)
+  values (uid, 'you@supercars-witbank.co.za', 'Owner', 'admin', true)
+  on conflict (user_id) do update set role = 'admin', active = true;
+
+  raise notice 'Added as administrator.';
+end $$;
+
+-- Must return exactly one row.
+select email, name, role, active from public.portal_users;
 ```
 
 **4. Close signups.** Authentication → Sign In / Providers → Email → turn off
