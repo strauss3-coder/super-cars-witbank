@@ -195,6 +195,37 @@ moving reads as a template trying to impress you.
 
 ---
 
+## Testing
+
+```bash
+npm --prefix /tmp install jsdom   # once
+./test/run.sh
+```
+
+Three passes, and the last two are the ones that matter:
+
+| | |
+|---|---|
+| parse | every script compiles |
+| `test/pages.js` | all 11 pages loaded in a real DOM over HTTP, scripts run, 40 rendered elements asserted |
+| `test/portal.js` | the portal opened and all 18 modules and 44 tabs visited |
+
+Both fail on any thrown error, any `console.error`, any unhandled rejection, and
+any section that renders nothing.
+
+**Why this exists.** `node --check` only proves a file parses. It cannot see a
+ReferenceError, and one slipped through: a variable that did not exist in scope
+took down the whole stock page, which showed *"Stock could not be loaded"* to
+every visitor while every syntax check passed. The first run of this harness
+found that and a second fault the same day — an unguarded `matchMedia` call that
+would have killed the motion layer in any browser without it.
+
+The tests run with the network blocked, so each page has to fall back to the
+content built into `js/fallback.js`. That is also the state a fresh copy is in,
+so it exercises the path most people see first.
+
+---
+
 ## Signing in
 
 **There is no sign-in screen at the moment.** It was taken out while the portal

@@ -424,7 +424,7 @@ function bind(){
   });
 
   /* Saved is a filter like any other, so it goes through the same apply(). */
-  var savedBtn = U.el('[data-saved-toggle]',root);
+  var savedBtn = U.el('[data-saved-toggle]');
   if(savedBtn){
     var paintSaved = function(){
       var n = SC.saved.all().length;

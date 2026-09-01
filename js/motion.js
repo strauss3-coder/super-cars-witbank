@@ -20,8 +20,15 @@
 var SC = window.SC = window.SC || {};
 var U  = SC.U;
 
-var REDUCED = window.matchMedia &&
-              window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* matchMedia is missing in some embedded and headless environments. Asking it
+   anything without checking first would throw here and take the whole motion
+   layer down with it, leaving the page without its reveal. */
+function media(q){
+  try{ return !!(window.matchMedia && window.matchMedia(q).matches); }
+  catch(e){ return false; }
+}
+
+var REDUCED = media('(prefers-reduced-motion: reduce)');
 SC.reducedMotion = REDUCED;
 
 /* ------------------------------------------------------------- reveal -- */
@@ -192,7 +199,8 @@ function buttonFeedback(){
 /* A few pixels of pull toward the cursor on the largest buttons only.
    Skipped entirely on touch, where there is no cursor to be magnetic to. */
 function magnetic(){
-  if(REDUCED || !window.matchMedia('(hover:hover)').matches) return;
+  /* No cursor, nothing to be magnetic to. */
+  if(REDUCED || !media('(hover:hover)')) return;
 
   U.els('[data-magnetic]').forEach(function(el){
     var raf = null;
@@ -242,13 +250,17 @@ SC.fadeImages = function(root){
 };
 
 /* ---------------------------------------------------------------- go -- */
+/* Each piece is independent, so one failing must not stop the others. The
+   reveal in particular has to run: without it, anything carrying data-anim
+   would sit at opacity 0 until the safety net in core.js fires. */
 function boot(){
-  scrollDriver();
-  buttonFeedback();
-  magnetic();
-  faq();
-  SC.scan(document);
-  SC.fadeImages(document);
+  [scrollDriver, buttonFeedback, magnetic, faq,
+   function(){ SC.scan(document); },
+   function(){ SC.fadeImages(document); }
+  ].forEach(function(step){
+    try{ step(); }
+    catch(err){ console.error('[motion] '+(err && err.message)); }
+  });
 }
 
 if(document.readyState === 'loading'){
