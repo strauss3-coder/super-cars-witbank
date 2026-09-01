@@ -114,13 +114,16 @@ where anyone can read it; there is no reason to let strangers create accounts.
 
 A `service_role` key must never go in any of them. It belongs only in step 6.
 
-**6. Upload the photographs, then seed.**
+**6. Upload the photographs, then seed.** In Terminal:
 
 ```bash
-SUPABASE_URL=https://yourproject.supabase.co \
-SUPABASE_SERVICE_KEY=eyJ... \
+cd ~/Desktop/Super-Cars
 ./database/upload-media.sh
 ```
+
+It reads the project address out of `js/config.js` and asks you to paste the
+service_role key, so nothing secret ends up in your shell history. It refuses a
+publishable key rather than failing 59 times with a confusing 401.
 
 Then run `database/02-seed.sql` in the SQL Editor.
 

@@ -9,9 +9,10 @@
 #
 # Run it from anywhere; it works out its own location.
 #
-#   SUPABASE_URL=https://yourproject.supabase.co \
-#   SUPABASE_SERVICE_KEY=eyJ... \
 #   ./database/upload-media.sh
+#
+# It reads the project address from js/config.js and asks you to paste the
+# service_role key, so nothing secret ends up in your shell history.
 #
 # The service role key bypasses row level security, which is what lets this
 # write to Storage without signing in. It is a SECRET. Never put it in the
@@ -24,19 +25,49 @@ root="$(dirname "$here")"
 src="$root/assets/stock"
 bucket="vehicle-images"
 
-if [[ -z "${SUPABASE_URL:-}" || -z "${SUPABASE_SERVICE_KEY:-}" ]]; then
-  cat >&2 <<'MSG'
-Missing configuration.
+# ---------------------------------------------------------------------------
+# The project address is read out of the website's own config, so there is one
+# place it is written down and this can never be pointed at the wrong project.
+# ---------------------------------------------------------------------------
+if [[ -z "${SUPABASE_URL:-}" ]]; then
+  SUPABASE_URL="$(sed -n "s/.*supabaseUrl: *'\([^']*\)'.*/\1/p" "$root/js/config.js" | head -1)"
+fi
 
-  SUPABASE_URL          your project URL, e.g. https://abcd.supabase.co
-  SUPABASE_SERVICE_KEY  Project Settings -> API -> service_role key
+if [[ -z "$SUPABASE_URL" || "$SUPABASE_URL" == *YOUR-PROJECT* ]]; then
+  echo "No Supabase project is set in js/config.js, so there is nowhere to upload to." >&2
+  exit 1
+fi
 
-Example:
+# ---------------------------------------------------------------------------
+# The service role key is asked for rather than typed into the command, so it
+# never lands in your shell history where anyone with the machine could read it
+# back. Nothing is echoed as you paste.
+# ---------------------------------------------------------------------------
+if [[ -z "${SUPABASE_SERVICE_KEY:-}" ]]; then
+  echo
+  echo "Uploading photographs to:"
+  echo "  $SUPABASE_URL"
+  echo
+  echo "Paste your service_role key and press return."
+  echo "Find it in Supabase: Settings -> API -> Project API keys -> service_role -> Reveal."
+  echo "Nothing will appear as you paste. That is deliberate."
+  echo
+  printf "service_role key: "
+  read -rs SUPABASE_SERVICE_KEY
+  echo
+  echo
+fi
 
-  SUPABASE_URL=https://abcd.supabase.co \
-  SUPABASE_SERVICE_KEY=eyJhbGci... \
-  ./database/upload-media.sh
-MSG
+if [[ -z "$SUPABASE_SERVICE_KEY" ]]; then
+  echo "No key given, so nothing was uploaded." >&2
+  exit 1
+fi
+
+# A publishable key cannot write to Storage, and the failure it produces is a
+# confusing 401 on every single file. Catch it here instead.
+if [[ "$SUPABASE_SERVICE_KEY" == sb_publishable_* || "$SUPABASE_SERVICE_KEY" == publishable_* ]]; then
+  echo "That is the publishable key, which is not allowed to upload." >&2
+  echo "You need the one marked service_role, under the same screen." >&2
   exit 1
 fi
 
