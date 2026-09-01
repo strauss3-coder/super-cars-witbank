@@ -198,27 +198,36 @@ moving reads as a template trying to impress you.
 ## Testing
 
 ```bash
-npm --prefix /tmp install jsdom   # once
+npm --prefix /tmp install jsdom    # once
+brew install postgresql@16         # once
 ./test/run.sh
 ```
 
-Three passes, and the last two are the ones that matter:
+Four passes, and only the first is cheap:
 
 | | |
 |---|---|
 | parse | every script compiles |
 | `test/pages.js` | all 11 pages loaded in a real DOM over HTTP, scripts run, 40 rendered elements asserted |
-| `test/portal.js` | the portal opened and all 18 modules and 44 tabs visited |
+| `test/portal.js` | the portal opened, all 18 modules and 44 tabs visited, plus the sign-in lock |
+| `test/database.sh` | both SQL files run against a throwaway Postgres, then the security is probed as anon and as staff |
 
 Both fail on any thrown error, any `console.error`, any unhandled rejection, and
 any section that renders nothing.
 
-**Why this exists.** `node --check` only proves a file parses. It cannot see a
-ReferenceError, and one slipped through: a variable that did not exist in scope
-took down the whole stock page, which showed *"Stock could not be loaded"* to
-every visitor while every syntax check passed. The first run of this harness
-found that and a second fault the same day — an unguarded `matchMedia` call that
-would have killed the motion layer in any browser without it.
+**Why this exists.** Reading a file proves nothing. Six defects reached the
+customer before a test did:
+
+- a variable that did not exist in scope, which showed *"Stock could not be
+  loaded"* to every visitor while every syntax check passed;
+- an unguarded `matchMedia` call that killed the motion layer;
+- a view marked `security_invoker` that the website was refused by;
+- a storage section that aborted the schema and silently took the grants with it;
+- a settings document grown past `jsonb_build_object`'s limit of 100 arguments;
+- and a stale Postgres on a shared port that made the database test read
+  somebody else's rows.
+
+Every one of those now fails loudly here instead.
 
 The tests run with the network blocked, so each page has to fall back to the
 content built into `js/fallback.js`. That is also the state a fresh copy is in,

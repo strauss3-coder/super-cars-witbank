@@ -4,7 +4,9 @@
 #
 #   ./test/run.sh
 #
-# Needs jsdom once:  npm --prefix /tmp install jsdom
+# Needs, once:
+#   npm --prefix /tmp install jsdom
+#   brew install postgresql@16
 # ============================================================================
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
@@ -33,6 +35,12 @@ node test/pages.js || fail=1
 echo
 echo "── portal ────────────────────────────────────────────"
 node test/portal.js || fail=1
+
+echo
+echo "── database ──────────────────────────────────────────"
+./test/database.sh
+rc=$?
+[ $rc -eq 2 ] && echo "  (skipped — Postgres not installed)" || [ $rc -eq 0 ] || fail=1
 
 echo
 if [ $fail -eq 0 ]; then echo "All clear."; else echo "Something failed above."; fi

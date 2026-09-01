@@ -72,7 +72,12 @@ insert into public.site_settings (key, value) values ('business', jsonb_build_ob
 -- HOMEPAGE  ->  Homepage Editor module
 -- Every string here renders on the home page. Nothing is hardcoded there.
 -- ---------------------------------------------------------------------------
-insert into public.site_settings (key, value) values ('homepage', jsonb_build_object(
+-- NOTE: jsonb_build_object accepts at most 100 arguments, which is 50 keys.
+-- This document has more, so it is built in chunks and merged with ||. If you
+-- add keys here, keep each chunk under 50 or Postgres will refuse the whole
+-- statement with "cannot pass more than 100 arguments to a function".
+insert into public.site_settings (key, value) values ('homepage',
+  jsonb_build_object(
   'heroBadge',    'Witbank''s trusted pre-owned dealership',
   'heroPhoto',    '',
   'trust', jsonb_build_array(
@@ -118,7 +123,8 @@ insert into public.site_settings (key, value) values ('homepage', jsonb_build_ob
     jsonb_build_object('icon','star','title','4.8 out of 5','text','Rated by 37 customers on Google, and most of them came to us on a recommendation.')
   ),
   'testimonialsTitle','What our customers say',
-  'testimonialsSub','Reviews from people who bought their car here.',
+  'testimonialsSub','Reviews from people who bought their car here.'
+  ) || jsonb_build_object(
   'testimonialsCount', 3,
   'aboutTitle',   'A family business, not a chain',
   'aboutText',    'Super Cars has sold quality pre-owned vehicles from Watermeyer Street in eMalahleni for over 25 years. We are small enough that you deal with the person who prices the car, and established enough that the banks take our calls.',
@@ -152,7 +158,8 @@ insert into public.site_settings (key, value) values ('homepage', jsonb_build_ob
   'makeLogos', '{}'::jsonb,
   'soldTitle','Recently sold',
   'soldSub','Cars that have already found an owner. Tell us if you want the next one.',
-  'soldCount', 4,
+  'soldCount', 4
+  ) || jsonb_build_object(
   'timelineTitle','Twenty-five years, briefly',
   'timelineSub','How a small floor on Watermeyer Street became what it is.',
   'faqTitle','Questions we get asked',
@@ -175,7 +182,8 @@ insert into public.site_settings (key, value) values ('homepage', jsonb_build_ob
     'why',true,'timeline',true,'testimonials',true,'sold',true,'faq',true,
     'about',true,'tradein',true,'banner',true,'contact',true,'map',true
   )
-)) on conflict (key) do update set value = excluded.value;
+  )
+) on conflict (key) do update set value = excluded.value;
 
 -- ---------------------------------------------------------------------------
 -- ABOUT PAGE  ->  Website Content module
