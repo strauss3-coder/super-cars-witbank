@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+._*
+
+# editors
+.vscode/
+.idea/
+*.swp
+
+# never commit a secret. The service_role key belongs in your shell when you
+# run upload-media.sh, and nowhere else.
+.env
+.env.*
+*.key

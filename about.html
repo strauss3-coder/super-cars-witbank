@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>About Us | Super Cars Witbank</title>
+<meta name="theme-color" content="#0E1116">
+<link rel="canonical" href="https://www.supercars-witbank.co.za/about.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body data-page="about">
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="hdr" data-header></header>
+
+<main id="main">
+
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="index.html">Home</a><span aria-hidden="true">/</span><span>About</span>
+      </nav>
+      <h1 data-about="title">About Super Cars</h1>
+      <p class="lead" data-about="subtitle"></p>
+    </div>
+  </section>
+
+  <!-- Story and rating -->
+  <section class="section">
+    <div class="wrap">
+      <div class="grid g-2" style="align-items:start;gap:clamp(24px,4vw,56px)">
+        <div class="stack">
+          <span class="eyebrow">Our story</span>
+          <h2 data-about="storyTitle"></h2>
+          <div class="prose" data-story></div>
+        </div>
+        <div class="stack">
+          <div data-rating></div>
+          <div data-owner></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section class="section alt" data-values-sec hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="t">
+          <span class="eyebrow">What we stand on</span>
+          <h2 data-about="valuesTitle"></h2>
+        </div>
+      </div>
+      <div class="grid g-2 why" data-values></div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="section" data-timeline-sec hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="t">
+          <span class="eyebrow">Since 1999</span>
+          <h2 data-about="timelineTitle"></h2>
+        </div>
+      </div>
+      <div class="grid g-4" data-timeline></div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="section alt" data-team-sec hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="t">
+          <span class="eyebrow">The team</span>
+          <h2 data-about="teamTitle"></h2>
+          <p class="lead" data-about="teamSub"></p>
+        </div>
+      </div>
+      <div class="grid g-4" data-team></div>
+    </div>
+  </section>
+
+  <!-- Location -->
+  <section class="section">
+    <div class="wrap">
+      <div class="grid g-2" style="align-items:center;gap:clamp(24px,4vw,52px)">
+        <div class="stack">
+          <span class="eyebrow">Find us</span>
+          <h2 data-about="locationTitle">Find us</h2>
+          <p class="lead" data-about="locationText"></p>
+          <div data-location-card></div>
+        </div>
+        <div class="map-box">
+          <iframe title="Our location on Google Maps" loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade" data-biz="mapEmbed"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tight">
+    <div class="wrap">
+      <div class="cta cta-split">
+        <div>
+          <h2>Come and walk the floor</h2>
+          <p>No appointment, no pressure. Look at what we have and ask us anything.</p>
+        </div>
+        <div class="row">
+          <a class="btn btn-pri btn-lg" href="inventory.html">See our stock</a>
+          <a class="btn btn-inv btn-lg" href="contact.html">Contact us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="ftr" data-footer></footer>
+<div data-wa-float></div>
+
+<script src="js/config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/fallback.js"></script>
+<script src="js/data.js"></script>
+<script src="js/site.js"></script>
+<script src="js/about.js"></script>
+</body>
+</html>
