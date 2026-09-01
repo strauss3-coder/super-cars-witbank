@@ -45,7 +45,14 @@ const wait = ms => new Promise(r => setTimeout(r,ms));
     errors.push('console.error: ' + m);
   });
 
-  const dom = new JSDOM(fs.readFileSync(path.join(ROOT,'portal/index.html'),'utf8'), {
+  /* The module walk needs the portal open, so the project is blanked for this
+     pass regardless of what is configured in the file. The lock is proved
+     separately below. */
+  const unconfigured = fs.readFileSync(path.join(ROOT,'portal/index.html'),'utf8')
+    .replace(/url:'https:\/\/[^']*'/, "url:'https://YOUR-PROJECT.supabase.co'")
+    .replace(/key:'[^']*'/,            "key:'YOUR-PUBLISHABLE-KEY'");
+
+  const dom = new JSDOM(unconfigured, {
     url: base + '/portal/index.html',
     runScripts:'dangerously',
     resources:{ interceptors:[ requestInterceptor(r =>
@@ -121,8 +128,8 @@ const wait = ms => new Promise(r => setTimeout(r,ms));
   console.log('\nWith a database configured and nobody signed in:\n');
 
   const src = fs.readFileSync(path.join(ROOT,'portal/index.html'),'utf8')
-    .replace("url:'https://YOUR-PROJECT.supabase.co'","url:'https://test-project.supabase.co'")
-    .replace("key:'YOUR-PUBLISHABLE-KEY'","key:'test-publishable-key'");
+    .replace(/url:'https:\/\/[^']*'/, "url:'https://test-project.supabase.co'")
+    .replace(/key:'[^']*'/,            "key:'test-publishable-key'");
 
   const lockErrors = [];
   const vc2 = new VirtualConsole();

@@ -17,7 +17,7 @@
 do $$
 declare
   -- >>> CHANGE THIS to your Supabase project URL, no trailing slash <<<
-  base_url text := 'https://YOUR-PROJECT.supabase.co';
+  base_url text := 'https://gbjuimzlbyznldhhqguc.supabase.co';
   img      text := base_url || '/storage/v1/object/public/vehicle-images/stock';
 begin
 

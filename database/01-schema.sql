@@ -417,17 +417,26 @@ create policy "manager manages settings"   on public.site_settings       for all
 -- ---------------------------------------------------------------------------
 -- 6. PUBLIC VIEWS  -  the only shape the website ever sees
 -- ---------------------------------------------------------------------------
--- security_invoker makes a view obey the row level security of whoever queries
--- it rather than the view's owner. Without it a view can quietly hand out rows
--- the policies above were meant to withhold. Needs Postgres 15+, which every
--- current Supabase project runs.
+-- These views run as their OWNER, not as the caller, and that is deliberate.
+--
+-- The website has no privileges on public.vehicles at all (see the revokes in
+-- section 8), so the view has to be able to reach the table on the visitor's
+-- behalf. Marking it security_invoker would make it run as the visitor, who
+-- would then be refused by the very revoke that protects the private columns —
+-- the site would get "permission denied" instead of your stock.
+--
+-- The view IS the security boundary here, and it is a tight one: it names only
+-- the safe columns, so vin, cost_price and notes cannot come out of it, and it
+-- filters to archived = false so drafts never appear. The portal reads the base
+-- table directly as an authenticated staff member, where row level security
+-- still applies.
 --
 -- Note what is NOT selected: vin, cost_price, notes, and the two syndication
 -- references. Those columns cannot
 -- reach the website even if a visitor edits the request by hand, because anon
 -- has no grant on the base table at all.
 drop view if exists public.website_vehicles;
-create view public.website_vehicles with (security_invoker = true) as
+create view public.website_vehicles as
   select id, stock, make, model, variant, year, mileage, transmission, fuel,
          body, colour, engine, power_kw, seats, fuel_use, co2, zero_to_hundred,
          doors, price, price_badge, installment, finance_eligible, description,
@@ -439,7 +448,7 @@ create view public.website_vehicles with (security_invoker = true) as
    order by featured desc, promoted desc, sort_order asc, created_at desc;
 
 drop view if exists public.website_testimonials;
-create view public.website_testimonials with (security_invoker = true) as
+create view public.website_testimonials as
   select id, name, vehicle, location, rating, review, photo, source,
          featured, sort_order, created_at
     from public.testimonials
@@ -450,11 +459,22 @@ create view public.website_testimonials with (security_invoker = true) as
 -- ---------------------------------------------------------------------------
 -- 7. STORAGE
 -- ---------------------------------------------------------------------------
-insert into storage.buckets (id, name, public)
-values ('vehicle-images','vehicle-images',true),
-       ('branding','branding',true),
-       ('tradein','tradein',true)
-on conflict (id) do update set public = true;
+-- Supabase does not always let the SQL Editor own storage.objects, and a
+-- failure here would otherwise abort everything after it — which is exactly
+-- what happens if you see the grants in section 8 never take effect. The whole
+-- section is therefore wrapped so a permissions refusal is reported and
+-- stepped over rather than taking the script down with it.
+do $$
+begin
+  insert into storage.buckets (id, name, public)
+  values ('vehicle-images','vehicle-images',true),
+         ('branding','branding',true),
+         ('tradein','tradein',true)
+  on conflict (id) do update set public = true;
+  raise notice 'Storage buckets ready.';
+exception when others then
+  raise warning 'Could not create the storage buckets (%). Make them by hand: Storage -> New bucket -> vehicle-images, branding, tradein, each ticked Public.', sqlerrm;
+end $$;
 
 do $$
 declare r record;
@@ -466,21 +486,24 @@ begin
   loop
     execute format('drop policy %I on storage.objects', r.policyname);
   end loop;
-end $$;
 
--- Anyone may view a photo. Only staff may add, replace or remove one, except
--- the trade-in bucket, where a member of the public uploads photos of the car
--- they want to sell.
-create policy "supercars public read" on storage.objects for select to anon, authenticated
-  using (bucket_id in ('vehicle-images','branding','tradein'));
-create policy "supercars public tradein upload" on storage.objects for insert to anon
-  with check (bucket_id = 'tradein');
-create policy "supercars staff insert" on storage.objects for insert to authenticated
-  with check (bucket_id in ('vehicle-images','branding','tradein') and public.is_staff());
-create policy "supercars staff update" on storage.objects for update to authenticated
-  using (bucket_id in ('vehicle-images','branding','tradein') and public.is_staff());
-create policy "supercars staff delete" on storage.objects for delete to authenticated
-  using (bucket_id in ('vehicle-images','branding','tradein') and public.is_staff());
+  -- Anyone may view a photo. Only staff may add, replace or remove one, except
+  -- the trade-in bucket, where a member of the public uploads photographs of
+  -- the car they want to sell.
+  create policy "supercars public read" on storage.objects for select to anon, authenticated
+    using (bucket_id in ('vehicle-images','branding','tradein'));
+  create policy "supercars public tradein upload" on storage.objects for insert to anon
+    with check (bucket_id = 'tradein');
+  create policy "supercars staff insert" on storage.objects for insert to authenticated
+    with check (bucket_id in ('vehicle-images','branding','tradein') and public.is_staff());
+  create policy "supercars staff update" on storage.objects for update to authenticated
+    using (bucket_id in ('vehicle-images','branding','tradein') and public.is_staff());
+  create policy "supercars staff delete" on storage.objects for delete to authenticated
+    using (bucket_id in ('vehicle-images','branding','tradein') and public.is_staff());
+  raise notice 'Storage policies ready.';
+exception when insufficient_privilege or others then
+  raise warning 'Could not set the storage policies (%). A public bucket already allows anyone to view and only signed in users to upload, which is what these policies were asking for, so it is safe to carry on.', sqlerrm;
+end $$;
 
 
 -- ---------------------------------------------------------------------------

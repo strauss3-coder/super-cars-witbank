@@ -13,8 +13,8 @@
    A service_role key must NEVER appear in this file.
    ========================================================================== */
 window.SC_CONFIG = {
-  supabaseUrl: 'https://YOUR-PROJECT.supabase.co',
-  supabaseKey: 'YOUR-PUBLISHABLE-KEY',
+  supabaseUrl: 'https://gbjuimzlbyznldhhqguc.supabase.co',
+  supabaseKey: 'sb_publishable_jPdPDPbOlcnbTyX-VjlwxA_QL6C7VAL',
 
   /* How long a successful read is reused before the site asks again. */
   cacheMinutes: 5
