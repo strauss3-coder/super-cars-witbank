@@ -155,7 +155,8 @@ empty page.
 | Finance Applications | receives the finance form |
 | Trade-In Requests | receives the sell-my-car form |
 | Testimonials | reviews on the home page and reviews page |
-| Homepage Editor | every section of the home page |
+| Homepage Editor | every section of the home page, across nine tabs |
+| Announcement Bar | the strip above the header on every page |
 | Website Content | about, finance, sell, navigation, footer, privacy, terms |
 | Business Information | header, footer, contact blocks, WhatsApp, structured data |
 | SEO | page titles, descriptions, sharing cards |
@@ -167,6 +168,30 @@ empty page.
 
 There are no modules without a purpose and no editable content without a module.
 The **System** page checks this continuously and lists anything incomplete.
+
+---
+
+## The front end
+
+Three stylesheets and a small motion layer, in load order:
+
+| File | What it owns |
+|---|---|
+| `css/style.css` | tokens, reset, typography, layout, header, footer |
+| `css/components.css` | buttons, cards, filters, gallery, forms, states |
+| `css/premium.css` | motion, depth, and the sections added in the polish pass |
+| `js/motion.js` | scroll reveal, counters, reading bar, header shrink, ripple, FAQ |
+
+**Nothing on the page depends on an animation arriving.** Elements only start
+hidden under a `.js` class that an inline script in `<head>` adds, so with
+JavaScript off everything is visible. If `motion.js` itself fails to load, a
+timer in `core.js` reveals anything still waiting after 2.6 seconds. And
+`prefers-reduced-motion` switches the whole layer off in one block, leaving
+every element in its resting position.
+
+Motion is deliberately restrained. One slow background gradient loops; nothing
+else moves once it has settled. Confidence reads as premium — a page that keeps
+moving reads as a template trying to impress you.
 
 ---
 
