@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+# The staff portal is not for search engines. Every page in it also carries
+# a noindex tag; this is the belt to that pair of braces.
+Disallow: /portal/
+
 Sitemap: https://www.supercars-witbank.co.za/sitemap.xml

@@ -1,26 +1,32 @@
 # Super Cars Witbank — website and CMS portal
 
+**Live now**
+
+| | |
+|---|---|
+| Website | https://strauss3-coder.github.io/super-cars-witbank/ |
+| Portal | https://strauss3-coder.github.io/super-cars-witbank/portal/ |
+
 A public dealership website and a staff portal that drives it, sharing one
 Supabase database. Everything a customer sees is edited in the portal; nothing
 on the website is hardcoded except the company's own branding.
 
 ```
-Super-Cars/
-├── database/
-│   ├── 01-schema.sql        tables, row level security, storage, views
-│   ├── 02-seed.sql          business details, website copy, the stock
-│   ├── stock.py             the canonical vehicle list — regenerates the two below
-│   └── upload-media.sh      pushes the photographs into Supabase Storage
+super-cars-witbank/          <- the website lives at the repo root, so it owns
+├── index.html                  the bare URL and a custom domain works properly
+├── inventory.html  vehicle.html  finance.html  sell.html
+├── about.html  testimonials.html  contact.html  privacy.html  terms.html
+├── 404.html    robots.txt  sitemap.xml
+├── assets/                  favicon · stock/ (the 59 vehicle photographs)
+├── css/                     style.css (foundation) · components.css
+├── js/                      config.js · fallback.js · one script per page
 ├── portal/
 │   └── index.html           the whole CMS, one file
-├── website/
-│   ├── index.html  inventory.html  vehicle.html  finance.html  sell.html
-│   ├── about.html  testimonials.html  contact.html  privacy.html  terms.html
-│   ├── 404.html    robots.txt  sitemap.xml
-│   ├── assets/     favicon · stock/ (the vehicle photographs)
-│   ├── css/        style.css (foundation) · components.css
-│   └── js/         config.js · fallback.js · one script per page
-└── media/stock/    the vehicle photographs, ready to upload
+└── database/
+    ├── 01-schema.sql        tables, row level security, storage, views
+    ├── 02-seed.sql          business details, website copy, the stock
+    ├── stock.py             the canonical vehicle list — regenerates two files
+    └── upload-media.sh      pushes the photographs into Supabase Storage
 ```
 
 No build step, no framework, no CDN. Open `website/index.html` and it runs —
@@ -45,6 +51,30 @@ It exists so the site is never empty, and as a safety net if the database is
 unreachable and the visitor has no cached copy.
 
 The browser console says which source is in use.
+
+---
+
+## Deploying
+
+Both links are served by GitHub Pages from `main`. There is no build step, so a
+push is a deploy:
+
+```bash
+git add -A
+git commit -m "what changed"
+git push
+```
+
+Give it a minute, then refresh. `gh api repos/strauss3-coder/super-cars-witbank/pages --jq .status`
+reports `built` when it has landed.
+
+The portal is at `/portal/` in the same repo, which is how it reaches
+`../js/fallback.js` — the one copy of the built-in content, shared by both.
+
+**When the real domain is ready:** point `supercars-witbank.co.za` at Pages and
+add a `CNAME` file at the repo root containing the bare domain. The website then
+answers on the domain itself and the portal on `/portal/`. Every page already
+carries a canonical tag pointing at that domain, so nothing else needs editing.
 
 ---
 
