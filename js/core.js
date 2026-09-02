@@ -256,6 +256,15 @@ SC.lightbox = (function(){
 setTimeout(function(){
   U.els('[data-anim]:not(.in)').forEach(function(n){ n.classList.add('in','done'); });
   U.els('[data-reveal]:not(.in)').forEach(function(n){ n.classList.add('in'); });
+  /* A figure that never counted would sit on its placeholder zero, which reads
+     as a real number rather than as an animation that did not arrive. */
+  U.els('[data-count]:not([data-counted])').forEach(function(n){
+    n.dataset.counted = '1';
+    var to = Number(n.dataset.count) || 0;
+    var dp = Number(n.dataset.decimals) || 0;
+    n.textContent = (n.dataset.prefix || '') +
+      (dp ? to.toFixed(dp) : U.group(to)) + (n.dataset.suffix || '');
+  });
 }, 2600);
 
 

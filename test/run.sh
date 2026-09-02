@@ -37,6 +37,10 @@ echo "── mobile menu ──────────────────�
 node test/menu.js || fail=1
 
 echo
+echo "── animation ─────────────────────────────────────────"
+node test/animation.js || fail=1
+
+echo
 echo "── every control ─────────────────────────────────────"
 node test/interactive.js || fail=1
 
