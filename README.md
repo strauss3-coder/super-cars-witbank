@@ -17,7 +17,8 @@ super-cars-witbank/          <- the website lives at the repo root, so it owns
 ├── inventory.html  vehicle.html  finance.html  sell.html
 ├── about.html  testimonials.html  contact.html  privacy.html  terms.html
 ├── 404.html    robots.txt  sitemap.xml
-├── assets/                  favicon · stock/ (the 59 vehicle photographs)
+├── assets/                  brand/ (logo, icons) · photos/ (the dealership)
+│                            stock/ (the 59 vehicle photographs)
 ├── css/                     style.css (foundation) · components.css
 ├── js/                      config.js · fallback.js · one script per page
 ├── portal/
@@ -231,6 +232,12 @@ Four passes, and only the first is cheap:
 | `test/pages.js` | all 11 pages loaded in a real DOM over HTTP, scripts run, 40 rendered elements asserted |
 | `test/portal.js` | the portal opened, all 18 modules and 44 tabs visited, plus the sign-in lock |
 | `test/database.sh` | both SQL files run against a throwaway Postgres, then the security is probed as anon and as staff |
+
+**Changing content after go-live.** `02-seed.sql` REPLACES each settings
+document, so re-running it throws away anything edited in the portal since.
+Anything added later ships as a numbered migration that merges with `||`
+instead — see `03-add-brand-assets.sql`, which adds fields only where they are
+still empty and is safe to run twice.
 
 Both fail on any thrown error, any `console.error`, any unhandled rejection, and
 any section that renders nothing.
