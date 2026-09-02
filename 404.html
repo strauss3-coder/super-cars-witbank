@@ -10,9 +10,20 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/brand/icon-512.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="assets/brand/icon-180.png">
+<!-- The first data request cannot start until the connection exists. Opening it
+     while the HTML is still parsing takes that handshake off the critical path. -->
+<link rel="preconnect" href="https://gbjuimzlbyznldhhqguc.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://gbjuimzlbyznldhhqguc.supabase.co">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/premium.css">
+<script defer src="js/config.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/motion.js"></script>
+<script defer src="js/fallback.js"></script>
+<script defer src="js/data.js"></script>
+<script defer src="js/site.js"></script>
+<script defer src="js/vehicle-card.js"></script>
 </head>
 <body data-page="notfound">
 
@@ -56,17 +67,14 @@
 <footer class="ftr" data-footer></footer>
 <div data-wa-float></div>
 
-<script src="js/config.js"></script>
-<script src="js/core.js"></script>
-<script src="js/motion.js"></script>
-<script src="js/fallback.js"></script>
-<script src="js/data.js"></script>
-<script src="js/site.js"></script>
-<script src="js/vehicle-card.js"></script>
 <script>
 /* Shows four current vehicles under the 404, so a bad link still leads
-   somewhere useful instead of stopping the visit. */
-(function(){
+   somewhere useful instead of stopping the visit.
+
+   Wrapped in DOMContentLoaded because the scripts above are deferred: they run
+   after the document is parsed but before this event, so waiting for it is what
+   guarantees SC exists by the time this needs it. */
+document.addEventListener('DOMContentLoaded',function(){
   'use strict';
   var SC = window.SC, U = SC.U;
   Promise.all([SC.site, SC.data.settings(), SC.data.vehicles()]).then(function(r){
@@ -80,7 +88,7 @@
     U.el('[data-suggest-sec]').hidden = false;
     SC.scan(document); SC.fadeImages(document);
   }).catch(function(){ /* a 404 must never itself error */ });
-})();
+});
 </script>
 </body>
 </html>

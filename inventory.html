@@ -10,9 +10,23 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/brand/icon-512.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="assets/brand/icon-180.png">
+<!-- The first data request cannot start until the connection exists. Opening it
+     while the HTML is still parsing takes that handshake off the critical path. -->
+<link rel="preconnect" href="https://gbjuimzlbyznldhhqguc.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://gbjuimzlbyznldhhqguc.supabase.co">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/premium.css">
+<script defer src="js/config.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/motion.js"></script>
+<script defer src="js/fallback.js"></script>
+<script defer src="js/data.js"></script>
+<script defer src="js/site.js"></script>
+<script defer src="js/forms.js"></script>
+<script defer src="js/vehicle-card.js"></script>
+<script defer src="js/compare.js"></script>
+<script defer src="js/inventory.js"></script>
 </head>
 <body data-page="inventory">
 
@@ -98,15 +112,5 @@
 <div data-wa-float></div>
 <div data-compare-tray></div>
 
-<script src="js/config.js"></script>
-<script src="js/core.js"></script>
-<script src="js/motion.js"></script>
-<script src="js/fallback.js"></script>
-<script src="js/data.js"></script>
-<script src="js/site.js"></script>
-<script src="js/forms.js"></script>
-<script src="js/vehicle-card.js"></script>
-<script src="js/compare.js"></script>
-<script src="js/inventory.js"></script>
 </body>
 </html>

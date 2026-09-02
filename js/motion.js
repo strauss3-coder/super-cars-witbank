@@ -31,6 +31,12 @@ function media(q){
 var REDUCED = media('(prefers-reduced-motion: reduce)');
 SC.reducedMotion = REDUCED;
 
+/* Timing, in one place so it stays consistent everywhere.
+   STAGGER was 70ms, which on a six-item row meant the last card arrived four
+   tenths of a second after the first — long enough to read as waiting. */
+var STAGGER = 42;      /* ms between items in a group */
+var STAGGER_MAX = 4;   /* never stagger more than this many steps */
+
 /* ------------------------------------------------------------- reveal -- */
 /* One observer for the whole page. Elements opt in with data-anim, and
    data-delay staggers a group without needing a class per position. */
@@ -42,15 +48,23 @@ function makeObserver(){
     entries.forEach(function(en){
       if(!en.isIntersecting) return;
       var el = en.target;
-      var delay = Number(el.dataset.delay) || 0;
-      setTimeout(function(){
-        el.classList.add('in');
-        /* Drop the compositor hint once it has settled. */
-        setTimeout(function(){ el.classList.add('done'); }, 900);
-      }, delay * 70);
+      var delay = Math.min(Number(el.dataset.delay) || 0, STAGGER_MAX);
+      if(delay){
+        setTimeout(function(){ el.classList.add('in'); }, delay * STAGGER);
+      }else{
+        el.classList.add('in');          /* the first of a group never waits */
+      }
+      setTimeout(function(){ el.classList.add('done'); }, delay * STAGGER + 700);
       io.unobserve(el);
     });
-  }, { rootMargin:'0px 0px -9% 0px', threshold:0.08 });
+  }, {
+    /* A positive bottom margin starts the animation while the element is still
+       below the fold, so by the time it is scrolled to it has already settled.
+       A negative margin held it back until it was on screen, which is what made
+       content look like it arrived late. */
+    rootMargin:'0px 0px 18% 0px',
+    threshold:0
+  });
 }
 
 /* Call after rendering anything, with the new subtree as root. */
@@ -64,13 +78,20 @@ SC.scan = function(root){
   }
   if(!io) io = makeObserver();
 
-  nodes.forEach(function(n){
-    /* Anything already on screen when it is created should not wait for a
-       scroll that may never come. */
+  /* Measure everything first, then change classes. Interleaving a read with a
+     write forces the browser to lay the page out once per element, which on a
+     long page is the difference between one layout and forty. */
+  var vh = window.innerHeight;
+  var seen = nodes.map(function(n){
     var r = n.getBoundingClientRect();
-    if(r.top < window.innerHeight * 0.92 && r.bottom > 0){
-      var d = Number(n.dataset.delay) || 0;
-      setTimeout(function(){ n.classList.add('in'); }, d * 70);
+    return r.top < vh * 1.15 && r.bottom > -100;
+  });
+
+  nodes.forEach(function(n,i){
+    if(seen[i]){
+      var d = Math.min(Number(n.dataset.delay) || 0, STAGGER_MAX);
+      if(d) setTimeout(function(){ n.classList.add('in'); }, d * STAGGER);
+      else n.classList.add('in');
       return;
     }
     io.observe(n);
@@ -105,7 +126,7 @@ function runCounter(el){
     el.textContent = pre + (dp ? to.toFixed(dp) : U.group(to)) + suf;
     return;
   }
-  var dur = 1100, t0 = performance.now();
+  var dur = 850, t0 = performance.now();
   function tick(now){
     var p = Math.min(1, (now - t0) / dur);
     var eased = 1 - Math.pow(1 - p, 3);
@@ -132,7 +153,7 @@ function countersIn(root){
         runCounter(en.target);
         counterIO.unobserve(en.target);
       });
-    }, { threshold:0.4 });
+    }, { threshold:0.25, rootMargin:'0px 0px 10% 0px' });
   }
   nodes.forEach(function(n){ counterIO.observe(n); });
 }

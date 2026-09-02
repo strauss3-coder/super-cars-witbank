@@ -6490,8 +6490,11 @@ const Router = {
       window.scrollTo({top:0,behavior:'instant'});
     };
 
-    if(mod.instant) paint();
-    else setTimeout(paint,140);
+    /* Painted immediately. This used to wait 140ms so the skeleton was seen,
+       which meant every navigation felt a tenth of a second slower in exchange
+       for showing a placeholder nobody asked for. The skeleton is still there
+       for the genuinely slow case — the first load, before the pull returns. */
+    paint();
   },
 
   refresh(){ if(this.current) this.go(this.current,this._params||{}); },

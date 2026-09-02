@@ -33,8 +33,16 @@ echo "── pages ────────────────────�
 node test/pages.js || fail=1
 
 echo
+echo "── mobile menu ───────────────────────────────────────"
+node test/menu.js || fail=1
+
+echo
 echo "── portal ────────────────────────────────────────────"
 node test/portal.js || fail=1
+
+echo
+echo "── listener leaks ────────────────────────────────────"
+node test/listeners.js || fail=1
 
 echo
 echo "── database ──────────────────────────────────────────"

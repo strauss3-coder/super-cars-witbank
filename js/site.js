@@ -227,33 +227,61 @@ function paintHeader(biz,nav){
       '<div class="hdr-cta">'+
         (tel ? '<a class="hdr-tel" href="tel:'+U.esc(U.telHref(tel))+'">'+
                SC.icon.phone+'<span>'+U.esc(tel)+'</span></a>' : '')+
-        '<button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="nav">'+
-          SC.icon.menu+
+        /* Both icons live in the button and CSS swaps them. Replacing the
+           innerHTML on tap used to destroy the very SVG the finger landed on,
+           which detached e.target and made the document handler believe the
+           tap had happened outside the menu — so it closed again in the same
+           click. Keeping both nodes removes that whole class of problem, and
+           avoids re-parsing an SVG on every tap. */
+        '<button class="burger" id="burger" aria-label="Open menu" '+
+          'aria-expanded="false" aria-controls="nav">'+
+          '<span class="i-open" aria-hidden="true">'+SC.icon.menu+'</span>'+
+          '<span class="i-shut" aria-hidden="true">'+SC.icon.x+'</span>'+
         '</button>'+
       '</div>'+
     '</div>';
 
   var burger = U.el('#burger'), menu = U.el('#nav');
-  burger.addEventListener('click',function(){
-    var open = menu.classList.toggle('open');
+
+  function setMenu(open){
+    menu.classList.toggle('open', open);
     burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-    burger.innerHTML = open ? SC.icon.x : SC.icon.menu;
+    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+
+  burger.addEventListener('click', function(e){
+    /* The same click would otherwise reach the document handler below and be
+       read as a tap outside. Stopping it here is what makes one tap mean one
+       thing. */
+    e.stopPropagation();
+    setMenu(!menu.classList.contains('open'));
   });
-  /* A tap outside, or a resize back to desktop, closes it. */
-  document.addEventListener('click',function(e){
+
+  /* A tap anywhere else closes it. closest() rather than contains(), because
+     it answers the question that actually matters — did this come from inside
+     the header — and keeps working however the icons are rendered. */
+  document.addEventListener('click', function(e){
     if(!menu.classList.contains('open')) return;
-    if(menu.contains(e.target) || burger.contains(e.target)) return;
-    menu.classList.remove('open');
-    burger.setAttribute('aria-expanded','false');
-    burger.innerHTML = SC.icon.menu;
+    if(e.target.closest && e.target.closest('#nav, #burger')) return;
+    setMenu(false);
   });
-  window.addEventListener('resize',U.debounce(function(){
-    if(window.innerWidth > 1024 && menu.classList.contains('open')){
-      menu.classList.remove('open');
-      burger.setAttribute('aria-expanded','false');
-      burger.innerHTML = SC.icon.menu;
-    }
-  },150));
+
+  /* Escape closes it, and returns focus to the button that opened it. */
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape' || !menu.classList.contains('open')) return;
+    setMenu(false);
+    burger.focus();
+  });
+
+  /* Following a link closes it, so the menu is never left open over the next
+     page on a browser that restores scroll position. */
+  menu.addEventListener('click', function(e){
+    if(e.target.closest('a')) setMenu(false);
+  });
+
+  window.addEventListener('resize', U.debounce(function(){
+    if(window.innerWidth > 1024) setMenu(false);
+  }, 150));
 
   var shadow = function(){ host.classList.toggle('scrolled', window.scrollY > 8); };
   shadow();
