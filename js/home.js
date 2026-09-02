@@ -55,12 +55,14 @@ Promise.all([
   paintFeatured(home, vehicles);
   paintLatest(home, vehicles);
   paintMakes(home, vehicles);
+  paintGallery(home);
   paintProcess(home);
   paintCategories(home, vehicles);
   paintPromises(home);
   paintWhy(home);
   paintTimeline(home, about);
   paintTestimonials(home, reviews);
+  paintReviewPhoto(home);
   paintSold(home, vehicles);
   paintAboutRating(biz);
   paintFaq(home);
@@ -329,6 +331,27 @@ function paintMakes(home,vehicles){
   show(host);
 }
 
+/* ------------------------------------------------------------ gallery -- */
+/* Photographs of the actual dealership. A card with no image is dropped rather
+   than left as an empty frame, so a half-filled gallery in the portal never
+   produces a hole on the page. */
+function paintGallery(home){
+  var host = U.el('[data-gallery]');
+  if(!host) return;
+  var list = (Array.isArray(home.gallery) ? home.gallery : [])
+    .filter(function(g){ return g && g.image; });
+  if(!list.length) return drop(host);
+
+  host.innerHTML = list.map(function(g,i){
+    return '<figure class="gal-card" data-anim="'+(i===0?'scale':'up')+'" data-delay="'+i+'">'+
+      '<img src="'+U.esc(g.image)+'" alt="'+U.esc(g.caption||'Super Cars Witbank')+'" '+
+        'loading="lazy" decoding="async">'+
+      (g.caption ? '<figcaption>'+U.esc(g.caption)+'</figcaption>' : '')+
+    '</figure>';
+  }).join('');
+  show(host);
+}
+
 /* ------------------------------------------------------------ process -- */
 function paintProcess(home){
   var host = U.el('[data-process]');
@@ -436,11 +459,44 @@ function paintTestimonials(home,reviews){
   if(list.length < n) list = list.concat(reviews.filter(function(t){ return !t.featured; }));
   list = list.slice(0,n);
 
-  /* No published reviews. The section removes itself rather than showing
-     invented ones. */
-  if(!list.length) return drop(host);
+  /* No reviews reproduced here yet. Rather than delete the section — which
+     would also lose the handover photograph beside it — the row points at the
+     genuine Google listing. Nothing is invented; it simply says where the real
+     reviews are. */
+  if(!list.length){
+    if(!home.testimonialsImage) return drop(host);
+    host.innerHTML =
+      '<div class="p-card" data-anim="up" style="grid-column:1/-1">'+
+        '<span class="p-ic">'+SC.icon.star+'</span>'+
+        '<h3>Our reviews live on Google</h3>'+
+        '<p>Every one of them was left by somebody who bought a car here. We are '+
+        'bringing them across to this site; in the meantime you can read them all '+
+        'in one place.</p>'+
+        (SC.biz && SC.biz.googleUrl
+          ? '<a class="btn btn-out btn-sm" style="margin-top:16px" href="'+
+            U.esc(SC.biz.googleUrl)+'" target="_blank" rel="noopener noreferrer">'+
+            'Read them on Google</a>'
+          : '')+
+      '</div>';
+    show(host);
+    return;
+  }
   host.innerHTML = list.map(function(t,i){ return SC.testimonialCard(t,i%3); }).join('');
   show(host);
+}
+
+/* A photograph of a real handover, shown beside the reviews. It says more than
+   any of the copy around it, so it is given room rather than tucked away. */
+function paintReviewPhoto(home){
+  var host = U.el('[data-review-photo]');
+  if(!host) return;
+  if(!home.testimonialsImage){ host.remove(); return; }
+  host.innerHTML =
+    '<figure class="photo-frame" data-anim="left" data-delay="1">'+
+      '<img src="'+U.esc(home.testimonialsImage)+'" loading="lazy" decoding="async" '+
+        'alt="A customer collecting their car from Super Cars Witbank">'+
+      '<figcaption>A customer collecting their car on Watermeyer Street.</figcaption>'+
+    '</figure>';
 }
 
 /* Shared with testimonials.html. */

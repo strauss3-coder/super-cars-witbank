@@ -654,3 +654,105 @@
   .faq-a{ transition:none !important }
   .read-bar{ transition:none !important }
 }
+
+/* ==========================================================================
+   17. THE REAL LOGO
+   The artwork is a wide wordmark, so it is sized by height and left to find
+   its own width. Two files: the drawn version for the light header, and a
+   knocked-out version for the dark footer.
+   ========================================================================== */
+.brand-logo{
+  height:42px; width:auto; flex-shrink:0;
+  transition:transform .34s var(--ease-spring), opacity .24s;
+}
+.brand:hover .brand-logo{ transform:scale(1.03) }
+.hdr.shrunk .brand-logo{ height:34px }
+.brand-logo.lg{ height:56px }
+@media (max-width:520px){
+  .brand-logo{ height:34px }
+  .brand-logo.lg{ height:46px }
+}
+
+/* ==========================================================================
+   18. THE DEALERSHIP GALLERY
+   Framed cards, not full-bleed panels. The originals are around 450px wide;
+   stretched across a desktop they would look soft, and at this size they are
+   sharp. The layout does not change if larger originals replace them.
+   ========================================================================== */
+.gal-grid{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(12px,1.6vw,20px);
+}
+@media (max-width:900px){ .gal-grid{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media (max-width:480px){ .gal-grid{ grid-template-columns:minmax(0,1fr) } }
+
+/* the first card takes two columns, so the row has a focal point rather than
+   four identical tiles */
+.gal-grid > :first-child{ grid-column:span 2 }
+@media (max-width:480px){ .gal-grid > :first-child{ grid-column:auto } }
+
+.gal-card{
+  position:relative; overflow:hidden; border-radius:var(--r-lg);
+  background:var(--ink); aspect-ratio:16/10;
+  border:1px solid var(--line);
+  transition:transform .4s var(--ease-soft), box-shadow .4s var(--ease-soft);
+}
+.gal-card:hover{ transform:translateY(-4px); box-shadow:var(--sh-3) }
+.gal-card img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  transition:transform .7s var(--ease-soft), filter .4s;
+  filter:saturate(1.02);
+}
+.gal-card:hover img{ transform:scale(1.06) }
+.gal-card figcaption{
+  position:absolute; left:0; right:0; bottom:0; z-index:2;
+  padding:26px 18px 15px;
+  background:linear-gradient(to top,rgba(10,12,16,.92),rgba(10,12,16,.55) 55%,transparent);
+  color:#fff; font-size:13.5px; font-weight:600; line-height:1.45;
+}
+.gal-card figcaption::before{
+  content:''; display:block; width:22px; height:2px; border-radius:2px;
+  background:var(--red-3); margin-bottom:8px;
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .4s var(--ease-soft);
+}
+.gal-card:hover figcaption::before{ transform:scaleX(1) }
+
+/* ==========================================================================
+   19. FRAMED PHOTOGRAPH  ·  used beside copy on About, Contact and Reviews
+   ========================================================================== */
+.photo-frame{
+  position:relative; border-radius:var(--r-lg); overflow:hidden;
+  border:1px solid var(--line); background:var(--paper-3);
+  box-shadow:var(--sh-2);
+}
+.photo-frame img{ width:100%; height:auto; display:block; aspect-ratio:16/9; object-fit:cover }
+.photo-frame.tall img{ aspect-ratio:4/3 }
+/* a red corner rule, so a plain photograph still reads as branded */
+.photo-frame::after{
+  content:''; position:absolute; left:0; bottom:0; width:64px; height:4px;
+  background:var(--red); border-radius:0 4px 0 0;
+}
+.photo-frame figcaption{
+  padding:12px 15px; font-size:12.5px; color:var(--text-2);
+  background:var(--paper); border-top:1px solid var(--line);
+}
+
+/* the same photograph on a dark band */
+.section.dark .photo-frame, .band-dark .photo-frame{
+  border-color:var(--line-inv);
+}
+.band-dark .photo-frame figcaption{
+  background:rgba(255,255,255,.04); color:var(--text-inv-2); border-top-color:var(--line-inv);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .gal-card:hover, .gal-card:hover img{ transform:none !important }
+  .brand:hover .brand-logo{ transform:none !important }
+  .gal-card:hover figcaption::before{ transform:scaleX(1) !important }
+}
+
+/* the reviews row and its photograph stack before the cards get too narrow */
+@media (max-width:1000px){
+  [data-tm-layout]{ grid-template-columns:minmax(0,1fr) !important }
+}

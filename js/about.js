@@ -19,6 +19,10 @@ Promise.all([SC.site, SC.data.settings()]).then(function(r){
     if(v) el.textContent = v;
   });
 
+  paintPhoto('[data-story-photo]',about.storyImage,
+    'The dealership on Watermeyer Street','Trading from the same premises since 1999.');
+  paintPhoto('[data-location-photo]',about.locationImage,
+    'Under the canopy at Super Cars Witbank','Every vehicle prepared before it is listed.');
   paintStory(about);
   paintRating(biz);
   paintOwner(about);
@@ -29,6 +33,18 @@ Promise.all([SC.site, SC.data.settings()]).then(function(r){
 
   SC.scan(document); SC.fadeImages(document);
 }).catch(function(err){ console.error('[about] '+err.message); });
+
+/* A framed photograph, dropped entirely when the portal has no image for it. */
+function paintPhoto(sel,src,alt,caption){
+  var host = U.el(sel);
+  if(!host) return;
+  if(!src){ host.remove(); return; }
+  host.innerHTML =
+    '<figure class="photo-frame" data-anim="left">'+
+      '<img src="'+U.esc(src)+'" alt="'+U.esc(alt)+'" loading="lazy" decoding="async">'+
+      (caption ? '<figcaption>'+U.esc(caption)+'</figcaption>' : '')+
+    '</figure>';
+}
 
 function paintStory(about){
   var host = U.el('[data-story]');

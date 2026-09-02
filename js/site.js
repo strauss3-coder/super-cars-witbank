@@ -30,7 +30,7 @@ SC.site = SC.data.settings().then(function(s){
   var seo  = s.seo        || {};
 
   SC.biz = biz;
-  paintSeo(seo, biz);
+  paintSeo(seo, biz, s.homepage || {});
   paintAnnounce(s.announce || {});
   paintHeader(biz, nav);
   paintFooter(biz, ftr, nav, s.finance || {});
@@ -43,7 +43,8 @@ SC.site = SC.data.settings().then(function(s){
 });
 
 /* ----------------------------------------------------------------- SEO -- */
-function paintSeo(seo,biz){
+function paintSeo(seo,biz,home){
+  home = home || {};
   var entry = (seo.pages && seo.pages[page]) || {};
   var suffix = seo.titleSuffix || '';
   var siteName = seo.siteName || biz.name || 'Super Cars Witbank';
@@ -61,7 +62,9 @@ function paintSeo(seo,biz){
   og('og:site_name', siteName);
   og('og:type', page==='vehicle' ? 'product' : 'website');
   og('og:url', location.href.split('#')[0]);
-  if(seo.defaultImage) og('og:image', seo.defaultImage);
+  /* A shared link should show the dealership, not nothing. The SEO setting
+     wins; without one the forecourt photograph is used. */
+  og('og:image', seo.defaultImage || home.heroPhoto || '');
 
   meta('twitter:card','summary_large_image');
   meta('twitter:title',document.title);
@@ -194,8 +197,12 @@ function paintHeader(biz,nav){
   ];
   var here = location.pathname.split('/').pop() || 'index.html';
 
+  /* The header sits on white, so it takes the artwork as drawn. Where a logo
+     exists it replaces the monogram AND the wordmark beside it, because the
+     logo already says the name and repeating it looks like a mistake. */
   var mark = biz.logo
-    ? '<span class="brand-mark"><img src="'+U.esc(biz.logo)+'" alt=""></span>'
+    ? '<img class="brand-logo" src="'+U.esc(biz.logo)+'" '+
+      'alt="'+U.esc(biz.name||'Super Cars')+'" width="611" height="327">'
     : '<span class="brand-mark">SC</span>';
 
   var tel = biz.phone || biz.mobile || '';
@@ -204,10 +211,11 @@ function paintHeader(biz,nav){
     '<div class="wrap hdr-in">'+
       '<a class="brand" href="index.html" aria-label="'+U.esc(biz.name||'Super Cars')+' home">'+
         mark+
-        '<span class="brand-txt">'+
-          '<b>'+U.esc(biz.shortName || biz.name || 'Super Cars')+'</b>'+
-          '<span>'+U.esc(biz.address2 || 'Witbank')+'</span>'+
-        '</span>'+
+        (biz.logo ? '' :
+          '<span class="brand-txt">'+
+            '<b>'+U.esc(biz.shortName || biz.name || 'Super Cars')+'</b>'+
+            '<span>'+U.esc(biz.address2 || 'Witbank')+'</span>'+
+          '</span>')+
       '</a>'+
       '<nav class="nav" id="nav">'+
         items.map(function(it){
@@ -282,10 +290,12 @@ function paintFooter(biz,ftr,nav,fin){
       '<div class="ftr-top">'+
         '<div class="ftr-brand">'+
           '<a class="brand" href="index.html">'+
-            (biz.logo ? '<span class="brand-mark"><img src="'+U.esc(biz.logo)+'" alt=""></span>'
-                      : '<span class="brand-mark">SC</span>')+
-            '<span class="brand-txt"><b>'+U.esc(biz.shortName||biz.name||'Super Cars')+'</b>'+
-            '<span>'+U.esc(biz.address2||'Witbank')+'</span></span>'+
+            (biz.logoLight || biz.logo
+              ? '<img class="brand-logo lg" src="'+U.esc(biz.logoLight||biz.logo)+'" '+
+                'alt="'+U.esc(biz.name||'Super Cars')+'" loading="lazy" width="611" height="327">'
+              : '<span class="brand-mark">SC</span>'+
+                '<span class="brand-txt"><b>'+U.esc(biz.shortName||biz.name||'Super Cars')+'</b>'+
+                '<span>'+U.esc(biz.address2||'Witbank')+'</span></span>')+
           '</a>'+
           (ftr.blurb ? '<p class="ftr-blurb">'+U.esc(ftr.blurb)+'</p>' : '')+
 

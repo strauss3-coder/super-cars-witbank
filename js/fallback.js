@@ -60,7 +60,8 @@ SC.fallback = {
       autotraderId:'3193',
       autotraderRating:4.4,
       autotraderReviews:14,
-      logo:'',
+      logo:'assets/brand/logo.png',
+      logoLight:'assets/brand/logo-light.png',
       hours:[
         {day:'Monday',   open:'08:00',close:'17:00',closed:false},
         {day:'Tuesday',  open:'08:00',close:'17:00',closed:false},
@@ -79,7 +80,7 @@ SC.fallback = {
 
     homepage:{
       heroBadge:'Witbank’s trusted pre-owned dealership',
-      heroPhoto:'',
+      heroPhoto:'assets/photos/forecourt.jpg',
       trust:[
         {icon:'award',  value:'25+',  label:'Years on Watermeyer Street'},
         {icon:'star',   value:'4.8',  label:'Google rating from 37 reviews'},
@@ -122,6 +123,7 @@ SC.fallback = {
         {icon:'swap',  title:'Fair trade-in prices',text:'Bring the car you have. We will value it honestly and put the offer in writing.'},
         {icon:'star',  title:'4.8 out of 5',        text:'Rated by 37 customers on Google, and most of them came to us on a recommendation.'}
       ],
+      testimonialsImage:'assets/photos/handover.jpg',
       testimonialsTitle:'What our customers say',
       testimonialsSub:'Reviews from people who bought their car here.',
       testimonialsCount:3,
@@ -154,6 +156,20 @@ SC.fallback = {
         {icon:'doc',     title:'History you can see',         text:'We tell you what we know about a car before you ask, including the parts that are not flattering.'},
         {icon:'swap',    title:'A fair number on your trade', text:'We value against the market, put the offer in writing, and settle your outstanding finance directly.'},
         {icon:'phone',   title:'We answer afterwards',        text:'People phone us a year after buying. We pick up. That is most of why they came to us in the first place.'}
+      ],
+
+      /* ---- the dealership itself ----
+         Real photographs of the floor, deliberately shown as framed cards
+         rather than full-bleed panels: the originals are around 450px wide, and
+         stretched across a desktop they would look soft. At this size they are
+         sharp. Replace them with larger originals and the layout still holds. */
+      galleryTitle:'Come and see the floor',
+      gallerySub:'Watermeyer Street, six days a week. This is what you will find.',
+      gallery:[
+        {image:'assets/photos/forecourt.jpg', caption:'The front of the dealership on Watermeyer Street'},
+        {image:'assets/photos/floor.jpg',     caption:'Under cover, so nothing sits in the sun'},
+        {image:'assets/photos/handover.jpg',  caption:'A customer collecting their car'},
+        {image:'assets/photos/canopy.jpg',    caption:'Every vehicle prepared before it is listed'}
       ],
 
       /* ---- marques on the floor ---- */
@@ -197,7 +213,7 @@ SC.fallback = {
 
       sections:{
         hero:true, search:true, stats:true, trust:true, featured:true, finance:true,
-        latest:true, categories:true, makes:true, process:true, promise:true,
+        latest:true, categories:true, makes:true, gallery:true, process:true, promise:true,
         why:true, timeline:true, testimonials:true, sold:true, faq:true,
         about:true, tradein:true, banner:true, contact:true, map:true
       }
@@ -209,6 +225,8 @@ SC.fallback = {
       storyTitle:'Twenty-five years on Watermeyer Street',
       story:'Super Cars opened its doors in eMalahleni in 1999 and has traded from the same premises on Watermeyer Street ever since. What started as a small floor of a dozen cars has grown into one of the town’s established independent dealerships, but the way we work has not changed: we buy carefully, we price honestly, and we tell you what we know about a car before you ask.\n\nMost of our business still comes from people who were sent to us by someone we sold to years ago. That is the only advertising that has ever really worked for us, and it is why we would rather lose a deal than oversell a car.',
       ownerName:'H C Kuhn', ownerRole:'Owner', ownerPhoto:'', ownerQuote:'',
+      storyImage:'assets/photos/forecourt.jpg',
+      locationImage:'assets/photos/canopy.jpg',
       valuesTitle:'What we stand on',
       values:[
         {title:'Honest descriptions',text:'If a car has a mark on it, we will point it out before you find it.'},
@@ -233,6 +251,10 @@ SC.fallback = {
       ],
       locationTitle:'Find us',
       locationText:'We are on Watermeyer Street in eMalahleni, a few minutes from the N4. There is parking on site and you are welcome to walk the floor without anyone following you around.'
+    },
+
+    contact:{
+      image:'assets/photos/canopy.jpg'
     },
 
     finance:{

@@ -25,6 +25,7 @@ Promise.all([SC.site, SC.data.settings(), SC.data.testimonials()]).then(function
   var biz = r[1].business || {};
   var list = r[2];
 
+  paintPhoto((r[1].homepage || {}).testimonialsImage);
   paintRating(biz, list);
   paintReviews(list, biz);
   paintReviewLink(biz);
@@ -34,6 +35,20 @@ Promise.all([SC.site, SC.data.settings(), SC.data.testimonials()]).then(function
   host.innerHTML = '<div class="empty" style="grid-column:1/-1">'+SC.icon.warn+
     '<b>Reviews could not be loaded</b><p>Please refresh the page.</p></div>';
 });
+
+/* The handover photograph. Real customers collecting a real car carries more
+   weight on this page than any wording around it. */
+function paintPhoto(src){
+  var host = U.el('[data-review-photo]');
+  if(!host) return;
+  if(!src){ host.remove(); return; }
+  host.innerHTML =
+    '<figure class="photo-frame" data-anim="left">'+
+      '<img src="'+U.esc(src)+'" loading="lazy" decoding="async" '+
+        'alt="A customer collecting their car from Super Cars Witbank">'+
+      '<figcaption>A customer collecting their car on Watermeyer Street.</figcaption>'+
+    '</figure>';
+}
 
 function paintRating(biz,list){
   var slot = U.el('[data-rating]');

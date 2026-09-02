@@ -388,7 +388,7 @@ create policy "admin manages team" on public.portal_users for all    to authenti
 -- Only published content, and only the documents meant to be seen. Anonymous
 -- visitors reach vehicles and testimonials through views, never base tables.
 create policy "public reads settings" on public.site_settings for select to anon
-  using (key in ('homepage','about','finance','sell','business','navigation','footer','legal','seo','announce'));
+  using (key in ('homepage','about','finance','sell','business','navigation','footer','legal','seo','announce','contact'));
 
 -- ---- what the public website may WRITE ----
 -- Insert only. A visitor can post a form and can never read one back, so one

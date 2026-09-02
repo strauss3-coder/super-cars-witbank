@@ -74,20 +74,36 @@ if psql -h "$SOCK" -p $PORT -U postgres -d sc -v ON_ERROR_STOP=1 -f database/01-
 if psql -h "$SOCK" -p $PORT -U postgres -d sc -v ON_ERROR_STOP=1 -f database/02-seed.sql >/tmp/sc-seed.log 2>&1
   then say "ok    02-seed.sql";   else say "FAIL  02-seed.sql";   grep -i error /tmp/sc-seed.log   | head -5; fail=1; fi
 
+# What the seed SHOULD contain is read from the website's own built-in content
+# and from the canonical stock list, so these numbers cannot go stale the next
+# time a field or a vehicle is added.
+EXP_DOCS=$(python3 -c "
+import io,re
+s=io.open('js/fallback.js',encoding='utf-8').read()
+print(len(re.findall(r'^    ([a-z]+):\{',s,re.M)))")
+EXP_HOME=$(python3 -c "
+import io,re
+s=io.open('js/fallback.js',encoding='utf-8').read()
+print(len(re.findall(r'^      [a-zA-Z0-9_]+:',s.split('homepage:{')[1].split('\n    },')[0],re.M)))")
+EXP_CARS=$(python3 -c "
+import sys; sys.path.insert(0,'database'); import stock; print(len(stock.V))")
+EXP_PICS=$(python3 -c "
+import sys; sys.path.insert(0,'database'); import stock; print(sum(v['photos'] for v in stock.V))")
+
 echo
 echo "── the content landed ────────────────────────────────"
-check "10 settings documents"  "$(Q 'select count(*) from site_settings')" "10"
-check "17 vehicles"            "$(Q 'select count(*) from vehicles')" "17"
-check "17 live on the website" "$(Q 'select count(*) from website_vehicles')" "17"
-check "59 photograph records"  "$(Q 'select count(*) from media')" "59"
-check "homepage kept its keys" "$(Q "select count(*) from jsonb_object_keys((select value from site_settings where key='homepage')) k")" "58"
+check "$EXP_DOCS settings documents"  "$(Q 'select count(*) from site_settings')" "$EXP_DOCS"
+check "$EXP_CARS vehicles"            "$(Q 'select count(*) from vehicles')" "$EXP_CARS"
+check "$EXP_CARS live on the website" "$(Q 'select count(*) from website_vehicles')" "$EXP_CARS"
+check "$EXP_PICS photograph records"  "$(Q 'select count(*) from media')" "$EXP_PICS"
+check "homepage kept its keys"        "$(Q "select count(*) from jsonb_object_keys((select value from site_settings where key='homepage')) k")" "$EXP_HOME"
 check "every vehicle priced"   "$(Q 'select count(*) from website_vehicles where price <= 0')" "0"
 check "every slug unique"      "$(Q 'select count(*) from (select slug from vehicles group by slug having count(*)>1) d')" "0"
 
 echo
 echo "── a visitor can read the shop ───────────────────────"
-check "sees the stock"    "$(Q 'set role anon; select count(*) from website_vehicles')" "17"
-check "sees the settings" "$(Q 'set role anon; select count(*) from site_settings')" "10"
+check "sees the stock"    "$(Q 'set role anon; select count(*) from website_vehicles')" "$EXP_CARS"
+check "sees the settings" "$(Q 'set role anon; select count(*) from site_settings')" "$EXP_DOCS"
 
 echo
 echo "── and nothing else ──────────────────────────────────"

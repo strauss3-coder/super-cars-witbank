@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#0E1116">
 <link rel="canonical" href="https://www.supercars-witbank.co.za/about.html">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/brand/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="assets/brand/icon-180.png">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/premium.css">
@@ -41,6 +43,7 @@
           <div class="prose" data-story></div>
         </div>
         <div class="stack">
+          <div data-story-photo></div>
           <div data-rating></div>
           <div data-owner></div>
         </div>
@@ -98,9 +101,12 @@
           <p class="lead" data-about="locationText"></p>
           <div data-location-card></div>
         </div>
-        <div class="map-box">
-          <iframe title="Our location on Google Maps" loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade" data-biz="mapEmbed"></iframe>
+        <div class="stack">
+          <div data-location-photo></div>
+          <div class="map-box">
+            <iframe title="Our location on Google Maps" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade" data-biz="mapEmbed"></iframe>
+          </div>
         </div>
       </div>
     </div>

@@ -1112,7 +1112,7 @@ const MAP = {
 };
 
 /* The settings documents. Each is one row in site_settings. */
-const SETTINGS_KEYS = ['homepage','about','finance','sell','business','navigation','footer','legal','seo','announce'];
+const SETTINGS_KEYS = ['homepage','about','finance','sell','business','navigation','footer','legal','seo','announce','contact'];
 
 const Cloud = {
   SES:'sc_portal_session', Q:'sc_portal_queue', CACHE:'sc_portal_cache',
@@ -1413,7 +1413,7 @@ const Store = {
       vehicles:[], testimonials:[], enquiries:[], financeApps:[], tradeins:[],
       media:[], users:[], activity:[], views:[],
       homepage:{}, about:{}, finance:{}, sell:{},
-      business:{}, navigation:{}, footer:{}, legal:{}, seo:{}, announce:{},
+      business:{}, navigation:{}, footer:{}, legal:{}, seo:{}, announce:{}, contact:{},
       meta:{ lastSaved:0 }
     };
   },
@@ -4269,7 +4269,7 @@ Portal.register({
   /* Which repeaters appear on which tab, in the order they are rendered.
      bindMulti pairs them up with their arrays by position. */
   reps:{
-    trust:['trust'], figures:['stats'], listings:['categories'],
+    trust:['trust'], figures:['stats'], listings:['categories'], gallery:['gallery'],
     process:['process'], promise:['promises','why'], questions:['faq']
   },
 
@@ -4280,7 +4280,7 @@ Portal.register({
 
     const tabs = [
       ['hero','Hero'],['trust','Trust badges'],['figures','Figures'],
-      ['listings','Stock sections'],['process','How it works'],
+      ['listings','Stock sections'],['gallery','Photographs'],['process','How it works'],
       ['promise','Promise and reasons'],['questions','Questions'],
       ['panels','Panels'],['switches','Show or hide']
     ];
@@ -4441,6 +4441,38 @@ Portal.register({
                 ]
               })}
             </div>`)}
+        </div>`;
+
+      /* ------------------------------------------------------- gallery -- */
+      if(s.tab === 'gallery') return `
+        <div class="grid" style="gap:14px">
+          ${H.card('Photographs of the dealership',
+            'The row of pictures showing the floor. Four works best; the first one is shown double width.',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Heading',H.input('galleryTitle',d.galleryTitle,''))}
+              ${H.field('Sub-heading',H.input('gallerySub',d.gallerySub,''))}
+              <p class="hint">Paste a link, or upload in the Media Library and copy the link from
+              there. A card with no picture is left out rather than shown as an empty frame.</p>
+              ${H.repeater({
+                label:'Photograph', items:d.gallery||[],
+                fields:[
+                  {k:'image',  label:'Picture link'},
+                  {k:'caption',label:'Caption',ph:'Under cover, so nothing sits in the sun'}
+                ]
+              })}
+            </div>`)}
+
+          ${H.card('The photograph beside the reviews',
+            'Shown next to the customer reviews on the home page and on the reviews page.',`
+            <div class="sp" style="align-items:flex-end;margin-bottom:13px">
+              ${d.testimonialsImage
+                ? `<img src="${U.esc(d.testimonialsImage)}" alt=""
+                     style="width:150px;height:84px;object-fit:cover;border-radius:9px;border:1px solid var(--line)">`
+                : `<div style="width:150px;height:84px;border-radius:9px;background:var(--raise-2);
+                     display:grid;place-items:center;color:var(--text-3)">${ICON.image}</div>`}
+            </div>
+            ${H.field('Picture link',H.input('testimonialsImage',d.testimonialsImage,''),
+              'A real handover photograph does more here than any wording. Leave blank to hide it.')}`)}
         </div>`;
 
       /* ------------------------------------------------------- process -- */
@@ -4686,7 +4718,8 @@ Portal.register({
   render(){
     const s = this.state;
     const tabs = [['about','About page'],['finance','Finance page'],['sell','Sell my car'],
-                  ['nav','Navigation'],['footer','Footer'],['legal','Privacy and terms']];
+                  ['contact','Contact page'],['nav','Navigation'],['footer','Footer'],
+                  ['legal','Privacy and terms']];
 
     return `
     ${H.head('Website Content','The copy on every page other than the home page.',`
@@ -4714,6 +4747,15 @@ Portal.register({
               ${H.field('The story',H.ta('story',d.story,'',9),
                 'Leave a blank line between paragraphs.')}
             </div>`)}
+          ${H.card('Photographs','Shown beside the story and beside the map',`
+            <div class="grid" style="gap:13px">
+              ${H.field('Beside the story',H.input('storyImage',d.storyImage,''),
+                'A picture of the dealership itself works best here.')}
+              ${H.field('Beside the map',H.input('locationImage',d.locationImage,''))}
+              <p class="hint">Upload in the Media Library and copy the link, or paste one.
+              Leave either blank and that photograph is simply left out.</p>
+            </div>`)}
+
           ${H.card('The owner','Optional. Leave the name blank to hide this block.',`
             <div class="grid" style="gap:13px">
               <div class="f2">
@@ -4837,6 +4879,21 @@ Portal.register({
         </div>`;
       }
 
+      if(tab === 'contact'){
+        const d = Store.doc('contact');
+        return H.card('Contact page','',`
+          <div class="grid" style="gap:13px">
+            ${d.image
+              ? `<img src="${U.esc(d.image)}" alt="" style="width:220px;aspect-ratio:4/3;
+                   object-fit:cover;border-radius:11px;border:1px solid var(--line)">`
+              : ''}
+            ${H.field('Photograph',H.input('image',d.image,''),
+              'Shown above the contact details. A picture of the premises means "come and see us" has something behind it.')}
+            <p class="hint">The address, telephone numbers, opening hours and map on that page all
+            come from Business Information, so they are only ever typed once.</p>
+          </div>`);
+      }
+
       if(tab === 'nav'){
         const d = Store.doc('navigation');
         return H.card('Navigation','The links across the top of every page',`
@@ -4912,7 +4969,7 @@ Portal.register({
 
   mount(root){
     const s = this.state;
-    const docKey = { about:'about', finance:'finance', sell:'sell',
+    const docKey = { about:'about', finance:'finance', sell:'sell', contact:'contact',
                      nav:'navigation', footer:'footer', legal:'legal' }[s.tab];
     const d = Store.doc(docKey);
 
@@ -4923,7 +4980,8 @@ Portal.register({
       Store.saveDoc(docKey);
       Store.log('Website content edited',
         {about:'About page',finance:'Finance page',sell:'Sell my car page',
-         navigation:'Navigation',footer:'Footer',legal:'Legal pages'}[docKey],'doc');
+         contact:'Contact page',navigation:'Navigation',footer:'Footer',
+         legal:'Legal pages'}[docKey],'doc');
     };
 
     H.bind(root,(k,v)=>{
@@ -5132,16 +5190,40 @@ Portal.register({
           </div>
         </div>`)}
 
-      ${H.card('Logo and icon','Leave blank to use the SC monogram',`
-        <div class="grid" style="gap:13px">
-          <div class="sp" style="align-items:flex-end">
-            ${d.logo?`<img src="${U.esc(d.logo)}" alt="" style="height:48px;border-radius:8px;background:#fff;padding:4px">`:
-              `<div class="sb-mark" style="width:48px;height:48px">SC</div>`}
-            <button class="btn btn-sm" data-logo>${ICON.upload} ${d.logo?'Replace the logo':'Upload a logo'}</button>
-            ${d.logo?'<button class="btn btn-sm btn-ghost" data-nologo>Remove</button>':''}
-            <input type="file" accept="image/*" hidden data-logo-file>
+      ${H.card('Your logo','Two files, because the header sits on white and the footer on black',`
+        <div class="grid" style="gap:16px">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text-2);display:block;margin-bottom:9px">
+              For the header, on a light background</label>
+            <div class="sp" style="align-items:flex-end">
+              ${d.logo
+                ? `<img src="${U.esc(d.logo)}" alt="" style="height:52px;background:#fff;padding:6px;border-radius:9px">`
+                : `<div class="sb-mark" style="width:52px;height:52px">SC</div>`}
+              <button class="btn btn-sm" data-logo>${ICON.upload} ${d.logo?'Replace':'Upload'}</button>
+              ${d.logo?'<button class="btn btn-sm btn-ghost" data-nologo>Remove</button>':''}
+              <input type="file" accept="image/*" hidden data-logo-file>
+            </div>
+            <div style="margin-top:11px">${H.field('Or paste a link',H.input('logo',d.logo,''))}</div>
           </div>
-          ${H.field('Or paste a link',H.input('logo',d.logo,''))}
+
+          <div class="sep"></div>
+
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text-2);display:block;margin-bottom:9px">
+              For the footer, on a dark background</label>
+            <div class="sp" style="align-items:flex-end">
+              ${d.logoLight
+                ? `<img src="${U.esc(d.logoLight)}" alt="" style="height:52px;background:#111;padding:6px;border-radius:9px">`
+                : `<div class="sb-mark" style="width:52px;height:52px">SC</div>`}
+              <button class="btn btn-sm" data-logo2>${ICON.upload} ${d.logoLight?'Replace':'Upload'}</button>
+              ${d.logoLight?'<button class="btn btn-sm btn-ghost" data-nologo2>Remove</button>':''}
+              <input type="file" accept="image/*" hidden data-logo2-file>
+            </div>
+            <div style="margin-top:11px">${H.field('Or paste a link',H.input('logoLight',d.logoLight,''))}</div>
+            <p class="hint" style="margin-top:9px">The same artwork with the black ink lifted to
+            white, so the outline and the tagline do not disappear against the dark footer.
+            Without one the header version is used.</p>
+          </div>
         </div>`)}
     </div>`;
   },
@@ -5211,6 +5293,35 @@ Portal.register({
     if(rm) rm.addEventListener('click',()=>{
       d.logo = ''; save(); Router.refresh();
       UI.toast('ok','Logo removed','The SC monogram is shown instead.');
+    });
+
+    /* The dark-background version, uploaded the same way. */
+    const file2 = U.el('[data-logo2-file]',root);
+    const btn2 = U.el('[data-logo2]',root);
+    if(btn2 && file2){
+      btn2.addEventListener('click',()=>file2.click());
+      file2.addEventListener('change',U.guard(async()=>{
+        const f = file2.files[0];
+        if(!f) return;
+        try{
+          const img = await U.readImage(f,900,.92);
+          const up = await Cloud.uploadImage('branding',img.dataUrl,'brand');
+          d.logoLight = up.url;
+          Store.insert('media',{
+            id:U.id('m'), url:up.url, bucket:up.bucket, path:up.path,
+            name:'Logo, for dark backgrounds', folder:'branding', kind:'image',
+            bytes:up.bytes, width:img.width, height:img.height
+          });
+          save(); Router.refresh();
+          UI.toast('ok','Footer logo updated','');
+        }catch(err){ UI.toast('err','That did not upload',err.message); }
+        file2.value = '';
+      }));
+    }
+    const rm2 = U.el('[data-nologo2]',root);
+    if(rm2) rm2.addEventListener('click',()=>{
+      d.logoLight = ''; save(); Router.refresh();
+      UI.toast('ok','Removed','The header logo is used in the footer instead.');
     });
   }
 });

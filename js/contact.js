@@ -17,6 +17,7 @@ Promise.all([SC.site, SC.data.settings(), SC.data.vehicles()]).then(function(r){
   var biz = r[1].business || {};
   var vehicles = r[2].filter(function(v){ return !v.sold; });
 
+  paintPhoto((r[1].contact || {}).image, biz);
   paintOpenNow(biz);
   paintDetails(biz);
   paintForm(biz, vehicles);
@@ -70,6 +71,20 @@ function nextOpening(biz){
     return (step === 1 ? 'tomorrow' : name) + ' at ' + day.open;
   }
   return '';
+}
+
+/* A photograph of the place, so "come and see us" has something behind it.
+   Removed rather than left empty when the portal has no image. */
+function paintPhoto(src,biz){
+  var host = U.el('[data-contact-photo]');
+  if(!host) return;
+  if(!src){ host.remove(); return; }
+  host.innerHTML =
+    '<figure class="photo-frame tall" data-anim="right">'+
+      '<img src="'+U.esc(src)+'" loading="lazy" decoding="async" '+
+        'alt="'+U.esc((biz.name||'Super Cars')+' on Watermeyer Street')+'">'+
+      '<figcaption>'+U.esc(biz.addressFull||'Watermeyer Street, eMalahleni')+'</figcaption>'+
+    '</figure>';
 }
 
 function paintDetails(biz){

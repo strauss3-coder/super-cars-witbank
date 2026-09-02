@@ -71,6 +71,9 @@ const PAGES = [
       ['[data-featured] .veh',           'featured stock'],
       ['[data-latest] .veh',             'latest arrivals'],
       ['.make-tile',                     'marque tiles'],
+      ['.brand-logo',                    'the real logo in the header'],
+      ['.gal-card img',                  'dealership gallery'],
+      ['[data-review-photo] img',        'handover photograph'],
       ['[data-process] .p-card',         'how buying works'],
       ['.cat',                           'body type tiles'],
       ['[data-promises] .p-card',        'promises'],
@@ -107,16 +110,20 @@ const PAGES = [
       ['[data-steps] .why-item','steps']
     ]},
   { file:'about.html', name:'About', expect:[
+      ['[data-story-photo] img',    'forecourt photograph'],
+      ['[data-location-photo] img', 'canopy photograph'],
       ['[data-story] p',    'story'],
       ['[data-values] .why-item', 'values'],
       ['[data-timeline] div',     'timeline'],
       ['[data-team] .tm',         'team']
     ]},
   { file:'testimonials.html', name:'Reviews', expect:[
+      ['[data-review-photo] img',    'handover photograph'],
       ['[data-rating] .rating-hero', 'rating block'],
       ['[data-reviews]',             'reviews area']
     ]},
   { file:'contact.html', name:'Contact', expect:[
+      ['[data-contact-photo] img', 'dealership photograph'],
       ['[data-details] .info-row', 'contact details'],
       ['[data-contact-form] form', 'enquiry form'],
       ['.hours div',               'opening hours']

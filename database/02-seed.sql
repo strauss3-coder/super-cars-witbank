@@ -51,7 +51,8 @@ insert into public.site_settings (key, value) values ('business', jsonb_build_ob
   'autotraderId','3193',
   'autotraderRating', 4.4,
   'autotraderReviews', 14,
-  'logo',        '',
+  'logo',        'assets/brand/logo.png',
+  'logoLight',   'assets/brand/logo-light.png',
   'hours', jsonb_build_array(
     jsonb_build_object('day','Monday',   'open','08:00','close','17:00','closed',false),
     jsonb_build_object('day','Tuesday',  'open','08:00','close','17:00','closed',false),
@@ -79,7 +80,7 @@ insert into public.site_settings (key, value) values ('business', jsonb_build_ob
 insert into public.site_settings (key, value) values ('homepage',
   jsonb_build_object(
   'heroBadge',    'Witbank''s trusted pre-owned dealership',
-  'heroPhoto',    '',
+  'heroPhoto',    'assets/photos/forecourt.jpg',
   'trust', jsonb_build_array(
     jsonb_build_object('icon','award', 'value','25+',       'label','Years on Watermeyer Street'),
     jsonb_build_object('icon','star',  'value','4.8',       'label','Google rating from 37 reviews'),
@@ -122,6 +123,7 @@ insert into public.site_settings (key, value) values ('homepage',
     jsonb_build_object('icon','swap','title','Fair trade-in prices','text','Bring the car you have. We will value it honestly and put the offer in writing.'),
     jsonb_build_object('icon','star','title','4.8 out of 5','text','Rated by 37 customers on Google, and most of them came to us on a recommendation.')
   ),
+  'testimonialsImage','assets/photos/handover.jpg',
   'testimonialsTitle','What our customers say',
   'testimonialsSub','Reviews from people who bought their car here.'
   ) || jsonb_build_object(
@@ -153,6 +155,14 @@ insert into public.site_settings (key, value) values ('homepage',
     jsonb_build_object('icon','swap',  'title','A fair number on your trade','text','We value against the market, put the offer in writing, and settle your outstanding finance directly.'),
     jsonb_build_object('icon','phone', 'title','We answer afterwards','text','People phone us a year after buying. We pick up. That is most of why they came to us in the first place.')
   ),
+  'galleryTitle','Come and see the floor',
+  'gallerySub','Watermeyer Street, six days a week. This is what you will find.',
+  'gallery', jsonb_build_array(
+    jsonb_build_object('image','assets/photos/forecourt.jpg','caption','The front of the dealership on Watermeyer Street'),
+    jsonb_build_object('image','assets/photos/floor.jpg',    'caption','Under cover, so nothing sits in the sun'),
+    jsonb_build_object('image','assets/photos/handover.jpg', 'caption','A customer collecting their car'),
+    jsonb_build_object('image','assets/photos/canopy.jpg',   'caption','Every vehicle prepared before it is listed')
+  ),
   'makesTitle','Marques on our floor',
   'makesSub','The badges we stock most often.',
   'makeLogos', '{}'::jsonb,
@@ -178,7 +188,7 @@ insert into public.site_settings (key, value) values ('homepage',
   'bannerCta2', jsonb_build_object('text','See the stock','link','inventory.html'),
   'sections', jsonb_build_object(
     'hero',true,'search',true,'stats',true,'trust',true,'featured',true,'finance',true,
-    'latest',true,'categories',true,'makes',true,'process',true,'promise',true,
+    'latest',true,'categories',true,'makes',true,'gallery',true,'process',true,'promise',true,
     'why',true,'timeline',true,'testimonials',true,'sold',true,'faq',true,
     'about',true,'tradein',true,'banner',true,'contact',true,'map',true
   )
@@ -195,6 +205,8 @@ insert into public.site_settings (key, value) values ('about', jsonb_build_objec
   'story',    'Super Cars opened its doors in eMalahleni in 1999 and has traded from the same premises on Watermeyer Street ever since. What started as a small floor of a dozen cars has grown into one of the town''s established independent dealerships, but the way we work has not changed: we buy carefully, we price honestly, and we tell you what we know about a car before you ask.
 
 Most of our business still comes from people who were sent to us by someone we sold to years ago. That is the only advertising that has ever really worked for us, and it is why we would rather lose a deal than oversell a car.',
+  'storyImage','assets/photos/forecourt.jpg',
+  'locationImage','assets/photos/canopy.jpg',
   'ownerName','H C Kuhn',
   'ownerRole','Owner',
   'ownerPhoto','',
@@ -223,6 +235,13 @@ Most of our business still comes from people who were sent to us by someone we s
   ),
   'locationTitle','Find us',
   'locationText','We are on Watermeyer Street in eMalahleni, a few minutes from the N4. There is parking on site and you are welcome to walk the floor without anyone following you around.'
+)) on conflict (key) do update set value = excluded.value;
+
+-- ---------------------------------------------------------------------------
+-- CONTACT PAGE IMAGERY  ->  Website Content module
+-- ---------------------------------------------------------------------------
+insert into public.site_settings (key, value) values ('contact', jsonb_build_object(
+  'image', 'assets/photos/canopy.jpg'
 )) on conflict (key) do update set value = excluded.value;
 
 -- ---------------------------------------------------------------------------
