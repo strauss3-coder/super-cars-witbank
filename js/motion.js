@@ -31,6 +31,13 @@ function media(q){
 var REDUCED = media('(prefers-reduced-motion: reduce)');
 SC.reducedMotion = REDUCED;
 
+/* This file owns every scroll-driven change to the header. Deferred scripts run
+   in document order and this one is listed before site.js, so the flag is
+   already set when site.js decides whether it needs a fallback of its own.
+   Without it both files toggled .scrolled on the same element, one of them on
+   every scroll event rather than once a frame. */
+SC.ownsHeaderScroll = true;
+
 /* Timing, in one place so it stays consistent everywhere.
    STAGGER was 70ms, which on a six-item row meant the last card arrived four
    tenths of a second after the first — long enough to read as waiting. */
@@ -262,7 +269,9 @@ SC.fadeImages = function(root){
     img.dataset.faded = '1';
     if(img.complete && img.naturalWidth) return;
     img.style.opacity = '0';
-    img.style.transition = 'opacity .5s cubic-bezier(.22,1,.36,1)';
+    /* the same duration and curve the stylesheet uses, read from the tokens
+       so a change there reaches this too */
+    img.style.transition = 'opacity var(--t-slow) var(--ease-soft)';
     var show = function(){ img.style.opacity = '1'; };
     img.addEventListener('load', show, { once:true });
     /* A broken image must not stay invisible. */

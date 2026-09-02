@@ -152,7 +152,8 @@ function paintForm(){
           '<b>Add photographs</b>'+
           '<span>Up to '+maxPhotos+' pictures. Tap to choose, or drag them here.</span>'+
         '</div>'+
-        '<input type="file" accept="image/*" multiple hidden data-file>'+
+        '<input type="file" accept="image/*" multiple hidden data-file '+
+          'aria-label="Choose photographs of your car">'+
         '<div class="thumbs" data-thumbs hidden></div>'+
       '</div>'+
 

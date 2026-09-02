@@ -174,8 +174,12 @@ SC.vehicleCard = function(v,opts){
       '</div>'+
       '<div class="veh-foot">'+
         '<div class="veh-price">'+price+finance+'</div>'+
-        '<a class="veh-go" href="'+href+'" aria-label="View '+U.esc(v.fullTitle)+'" '+
-          'tabindex="-1">'+SC.icon.arrowR+'</a>'+
+        /* The card already offers this destination on the photograph, the
+           heading and the Details link. This arrow is the visual affordance
+           for the same thing, so it is hidden from assistive technology and
+           from the tab order rather than announced a fourth time. */
+        '<a class="veh-go" href="'+href+'" aria-hidden="true" tabindex="-1">'+
+          SC.icon.arrowR+'</a>'+
       '</div>'+
     '</div>'+
   '</article>';

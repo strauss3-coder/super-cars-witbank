@@ -51,6 +51,13 @@
   --wrap:1240px;
   --gut:clamp(16px,4vw,40px);
 
+
+  /* Motion scale. Three speeds, not thirteen. Anything an element does in
+     response to a pointer uses --t-fast; anything that changes state uses --t;
+     anything that travels across the page uses --t-slow. Consistency here is
+     most of what separates a designed interface from an assembled one. */
+  --t-fast:.16s; --t:.24s; --t-slow:.4s;
+
   --ease:cubic-bezier(.22,.85,.28,1);
   --ease-out:cubic-bezier(.16,1,.3,1);
 
@@ -118,7 +125,6 @@ table{border-collapse:collapse;width:100%}
 
 .grid{display:grid;gap:clamp(14px,1.6vw,22px)}
 .g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .g-4{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media (max-width:1080px){ .g-4{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:900px){ .g-3{grid-template-columns:repeat(2,minmax(0,1fr))} }
@@ -134,7 +140,7 @@ table{border-collapse:collapse;width:100%}
 .skip{
   position:absolute;left:12px;top:-60px;z-index:200;background:var(--ink);color:#fff;
   padding:10px 16px;border-radius:var(--r-sm);font-size:14px;font-weight:650;
-  transition:top .2s var(--ease);
+  transition:top var(--t-fast) var(--ease);
 }
 .skip:focus{top:12px}
 
@@ -148,9 +154,9 @@ table{border-collapse:collapse;width:100%}
   transition:box-shadow .25s var(--ease),background .25s var(--ease);
 }
 .hdr.scrolled{box-shadow:var(--sh-2)}
-.hdr-in{height:var(--header-h);display:flex;align-items:center;gap:clamp(16px,3vw,38px)}
+.hdr-in{height:var(--header-h);display:flex;align-items:center;gap:clamp(16px,3vw,40px)}
 
-.brand{display:flex;align-items:center;gap:11px;flex-shrink:0;min-width:0}
+.brand{display:flex;align-items:center;gap:12px;flex-shrink:0;min-width:0}
 .brand-mark{
   width:38px;height:38px;border-radius:10px;flex-shrink:0;
   background:linear-gradient(145deg,var(--red),var(--red-2));
@@ -165,8 +171,8 @@ table{border-collapse:collapse;width:100%}
 
 .nav{display:flex;align-items:center;gap:2px;margin-left:auto}
 .nav a{
-  padding:9px 13px;border-radius:var(--r-sm);font-size:14.5px;font-weight:600;
-  color:var(--text-2);transition:color .18s,background .18s;position:relative;white-space:nowrap;
+  padding:8px 12px;border-radius:var(--r-sm);font-size:14.5px;font-weight:600;
+  color:var(--text-2);transition:color var(--t-fast),background var(--t-fast);position:relative;white-space:nowrap;
 }
 .nav a:hover{color:var(--text);background:var(--paper-2)}
 .nav a.on{color:var(--text)}
@@ -177,14 +183,14 @@ table{border-collapse:collapse;width:100%}
 .hdr-cta{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .hdr-tel{
   display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;
-  padding:9px 14px;border-radius:var(--r-pill);border:1px solid var(--line-2);
-  transition:border-color .18s,background .18s;white-space:nowrap;
+  padding:8px 14px;border-radius:var(--r-pill);border:1px solid var(--line-2);
+  transition:border-color var(--t-fast),background var(--t-fast);white-space:nowrap;
 }
 .hdr-tel:hover{border-color:var(--ink);background:var(--paper-2)}
 .hdr-tel svg{width:15px;height:15px;color:var(--red);flex-shrink:0}
 
 .burger{
-  display:none;width:42px;height:42px;border-radius:var(--r-sm);
+  display:none;width:44px;height:44px;border-radius:var(--r-sm);
   border:1px solid var(--line-2);align-items:center;justify-content:center;flex-shrink:0;
 }
 .burger svg{width:19px;height:19px}
@@ -195,15 +201,15 @@ table{border-collapse:collapse;width:100%}
     flex-direction:column;align-items:stretch;gap:2px;padding:14px var(--gut) 26px;
     border-bottom:1px solid var(--line);box-shadow:var(--sh-3);
     transform:translateY(-12px);opacity:0;pointer-events:none;
-    transition:opacity .22s var(--ease),transform .22s var(--ease);
+    transition:opacity var(--t) var(--ease),transform var(--t) var(--ease);
     max-height:calc(100dvh - var(--header-h));overflow-y:auto;
   }
   .nav.open{transform:none;opacity:1;pointer-events:auto}
-  .nav a{padding:13px 14px;font-size:16px}
+  .nav a{padding:12px 14px;font-size:16px}
   .nav a.on::after{left:14px;right:auto;width:18px;bottom:8px}
   .burger{display:flex}
   .hdr-tel span{display:none}
-  .hdr-tel{padding:11px}
+  .hdr-tel{padding:12px}
 }
 @media (max-width:420px){
   .brand-txt span{display:none}
@@ -211,7 +217,7 @@ table{border-collapse:collapse;width:100%}
 
 /* -------------------------------------------------------------- footer -- */
 .ftr{background:var(--ink);color:var(--text-inv);padding-block:clamp(46px,6vw,74px) 0}
-.ftr a{color:var(--text-inv-2);transition:color .18s}
+.ftr a{color:var(--text-inv-2);transition:color var(--t-fast)}
 .ftr a:hover{color:#fff}
 .ftr-top{display:grid;grid-template-columns:1.6fr repeat(3,minmax(0,1fr));gap:clamp(24px,3vw,48px)}
 @media (max-width:920px){ .ftr-top{grid-template-columns:1fr 1fr} }
@@ -221,7 +227,7 @@ table{border-collapse:collapse;width:100%}
 .ftr-brand .brand-txt span{color:var(--text-inv-3)}
 .ftr-blurb{font-size:14px;line-height:1.65;color:var(--text-inv-2)}
 .ftr-col h4{font-size:12px;font-weight:750;letter-spacing:.13em;text-transform:uppercase;color:var(--text-inv-3);margin-bottom:16px}
-.ftr-col li+li{margin-top:11px}
+.ftr-col li+li{margin-top:12px}
 .ftr-col a{font-size:14.5px}
 .ftr-contact{display:grid;gap:12px;font-size:14.5px}
 .ftr-contact div{display:flex;gap:10px;align-items:flex-start;color:var(--text-inv-2)}
@@ -229,7 +235,7 @@ table{border-collapse:collapse;width:100%}
 .ftr-social{display:flex;gap:8px;flex-wrap:wrap}
 .ftr-social a{
   width:38px;height:38px;border-radius:var(--r-sm);border:1px solid var(--line-inv);
-  display:grid;place-items:center;transition:background .18s,border-color .18s,transform .18s;
+  display:grid;place-items:center;transition:background var(--t-fast),border-color var(--t-fast),transform var(--t-fast);
 }
 .ftr-social a:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28);transform:translateY(-2px)}
 .ftr-social svg{width:17px;height:17px}
@@ -246,7 +252,7 @@ table{border-collapse:collapse;width:100%}
   width:56px;height:56px;border-radius:var(--r-pill);
   background:#25D366;color:#fff;display:grid;place-items:center;
   box-shadow:0 10px 30px -8px rgba(37,211,102,.6);
-  transition:transform .22s var(--ease-out),box-shadow .22s;
+  transition:transform var(--t) var(--ease-out),box-shadow var(--t);
 }
 .wa-float:hover{transform:scale(1.07) translateY(-2px);box-shadow:0 16px 38px -10px rgba(37,211,102,.72)}
 .wa-float svg{width:28px;height:28px}

@@ -281,11 +281,15 @@ function paintHeader(biz,nav){
 
   window.addEventListener('resize', U.debounce(function(){
     if(window.innerWidth > 1024) setMenu(false);
-  }, 150));
+  }, 150), { passive:true });
 
-  var shadow = function(){ host.classList.toggle('scrolled', window.scrollY > 8); };
-  shadow();
-  window.addEventListener('scroll',shadow,{passive:true});
+  /* motion.js drives the header from one rAF-throttled listener shared with the
+     reading bar and the parallax. Only stand in for it when it is not there. */
+  if(!SC.ownsHeaderScroll){
+    var shadow = function(){ host.classList.toggle('scrolled', window.scrollY > 8); };
+    shadow();
+    window.addEventListener('scroll', shadow, { passive:true });
+  }
 }
 
 /* -------------------------------------------------------------- footer -- */
